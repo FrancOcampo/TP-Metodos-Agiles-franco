@@ -39,7 +39,7 @@ public class TitularController {
     }
 
     
-    //Cosas del front (revisar porque no creo que esto vaya aquí)
+    //Cosas del front (Esto se podria poner en otro controlador como por ejemplo TitularViewController)
 
     @GetMapping
     public String mostrarMenu() {  return "menuTitular";    }
@@ -50,7 +50,7 @@ public class TitularController {
     @GetMapping("/modificar")
     public String mostrarFormularioModificar() {   return "modificarTitular";    }
 
-    //modificar
+    //modificar (para modificar algo se usa un PUT creo)
     // No entiendo por qué esto (no existía esta tarea en el proyecto)
     @PostMapping("/modificar")
     public ResponseEntity<Titular> modificarTitular(@RequestBody Titular titular) {
