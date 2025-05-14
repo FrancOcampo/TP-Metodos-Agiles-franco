@@ -5,7 +5,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseVigenciaInvalidaException;
+import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
+import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 
 @Service
 public class LicenciaServiceImpl implements LicenciaService {
@@ -70,5 +73,33 @@ public class LicenciaServiceImpl implements LicenciaService {
 
         return costo;
     }
+    public Licencia emitirLicencia(Titular titular, String claseLicencia) throws ClaseEmisionInvalidaException {
+
+        // Obtener las licencias del titular
+        List<Licencia> licenciasTitular = titular.getLicencias();
+
+        // Buscar si el titular tiene una licencia de tipo B
+        boolean tieneLicenciaTipoB = licenciasTitular.stream()
+            .anyMatch(licencia -> licencia.getClase().equalsIgnoreCase("B") &&
+                    licencia.getFechaInicio().before(java.sql.Date.valueOf(java.time.LocalDate.now().minusYears(1))));
+
+        // Validar que tenga una licencia tipo B con más de un año de antigüedad
+        if ((claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E")) && !tieneLicenciaTipoB) {
+            throw new ClaseEmisionInvalidaException("El titular debe haber tenido una licencia tipo B con al menos un año de antigüedad para obtener una licencia de tipo C, D o E.");
+        }
+
+        // Validar que el titular tenga menos de 65 años
+          if (titular.getEdad() >= 65 && (claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E"))) {
+            throw new ClaseEmisionInvalidaException("El titular debe tener menos de 65 años para obtener una licencia de tipo C, D o E.");
+        }
+            // Emitir la licencia
+            Licencia nuevaLicencia = new Licencia();
+            nuevaLicencia.setTitular(titular);
+            nuevaLicencia.setClase(claseLicencia);
+            nuevaLicencia.setEstaVigente(true);
+            nuevaLicencia.setFechaInicio(java.sql.Date.valueOf(java.time.LocalDate.now()));
+
+            return nuevaLicencia;
+        }
 
 }

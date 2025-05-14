@@ -1,6 +1,11 @@
 package com.gestionlicencias.gestionlicenciasconducir.model;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.*;
 
@@ -40,6 +45,9 @@ public class Titular{
 
     @Column(name = "donante_organos", nullable = false)
     private Boolean donanteOrganos;
+
+    @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Licencia> licencias = new ArrayList<>();
 
     public Titular() {
     }
@@ -124,4 +132,24 @@ public class Titular{
         this.donanteOrganos = donanteOrganos;
     }
 
+    public List<Licencia> getLicencias() {
+        return licencias;
+    }
+
+    public void addLicencia(Licencia licencia) {
+        this.licencias.add(licencia);
+        licencia.setTitular(this);
+    }
+    
+    public int getEdad() {
+    if (fechaNacimiento == null) {
+        return 0;
+    }
+
+    // Convertir Date a LocalDate
+    LocalDate birthDate = fechaNacimiento.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDate today = LocalDate.now();
+    // Calcular la diferencia en años
+    return Period.between(birthDate, today).getYears();
+    }
 }

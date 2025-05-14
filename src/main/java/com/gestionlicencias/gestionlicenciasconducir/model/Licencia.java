@@ -12,6 +12,9 @@ public class Licencia {
     @Column(name = "id_licencia")
     private Integer idLicencia;
 
+    @Column(name = "clase", nullable = false)
+    private String clase;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_inicio", nullable = false)
     private Date fechaInicio;
@@ -22,6 +25,10 @@ public class Licencia {
 
     @Column(name = "esta_vigente", nullable = false)
     private Boolean estaVigente;
+
+    @ManyToOne
+    @JoinColumn(name = "id_titular", nullable = false)
+    private Titular titular;
 
     public Licencia() {
     }
@@ -56,5 +63,21 @@ public class Licencia {
 
     public void setEstaVigente(Boolean estaVigente) {
         this.estaVigente = estaVigente;
+    }
+
+    public String getClase() {
+        return clase;
+    }
+
+    public void setClase(String clase) {
+        this.clase = clase;
+    }
+
+    public Titular getTitular() {
+        return titular;
+    }
+
+    public void setTitular(Titular titular) {
+        this.titular = titular;
     }
 }
