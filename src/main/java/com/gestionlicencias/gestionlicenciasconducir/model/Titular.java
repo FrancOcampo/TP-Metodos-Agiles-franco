@@ -3,7 +3,6 @@ package com.gestionlicencias.gestionlicenciasconducir.model;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,8 +45,9 @@ public class Titular{
     @Column(name = "donante_organos", nullable = false)
     private Boolean donanteOrganos;
 
+    // Relación uno-a-muchos con Licencia
     @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Licencia> licencias = new ArrayList<>();
+    private List<Licencia> licencias;
 
     public Titular() {
     }
