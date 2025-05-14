@@ -73,6 +73,7 @@ public class LicenciaServiceImpl implements LicenciaService {
 
         return costo;
     }
+    /*
     public Licencia emitirLicencia(Titular titular, String claseLicencia) throws ClaseEmisionInvalidaException {
 
         // Obtener las licencias del titular
@@ -101,5 +102,6 @@ public class LicenciaServiceImpl implements LicenciaService {
 
             return nuevaLicencia;
         }
+    */
 
 }
