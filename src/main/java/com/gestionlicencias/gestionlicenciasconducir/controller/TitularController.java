@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
+import com.gestionlicencias.gestionlicenciasconducir.Exception.ExisteDocumentoException;
 
 @Controller
 @RequestMapping("/api/titulares")
@@ -23,23 +23,17 @@ public class TitularController {
         this.service = service;
     }
 
-    @PostMapping("/crear")
-    public ResponseEntity<Titular> crearTitular(@RequestBody Titular titular) {
-        Titular creado = service.crearTitular(titular);
-        return ResponseEntity.ok(creado);
+    @PostMapping("/registrar")
+    public ResponseEntity<Titular> registrarTitular(@RequestBody Titular titular) {
+        try {
+            Titular creado = service.registrarTitular(titular);
+            return ResponseEntity.ok(creado);
+        } catch (ExisteDocumentoException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
-
-    // Manejo de excepciones (necesito esto para correr los tests)
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArg(IllegalArgumentException ex) {
-        // 400 Bad Request o 500 según prefieras
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
-    }
-
     
-    //Cosas del front (Esto se podria poner en otro controlador como por ejemplo TitularViewController)
+    //Endpoints para el front
 
     @GetMapping
     public String mostrarMenu() {  return "menuTitular";    }
@@ -50,14 +44,6 @@ public class TitularController {
     @GetMapping("/modificar")
     public String mostrarFormularioModificar() {   return "modificarTitular";    }
 
-    //modificar (para modificar algo se usa un PUT creo)
-    // No entiendo por qué esto (no existía esta tarea en el proyecto)
-    @PostMapping("/modificar")
-    public ResponseEntity<Titular> modificarTitular(@RequestBody Titular titular) {
-        Titular modificado = service.crearTitular(titular);//Modificar crear por registrar
-        return ResponseEntity.ok(modificado);
-    }
-
     //eliminar
     @GetMapping("/eliminar")
     public String mostrarFormularioEliminar() {   return "eliminarTitular";    }
@@ -65,7 +51,5 @@ public class TitularController {
     //listar
     @GetMapping("/listar")
     public String mostrarFormularioListar() {   return "listarTitular";    }
-
-
 
 }

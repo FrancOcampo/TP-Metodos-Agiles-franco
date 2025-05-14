@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.repository.TitularRepository;
+import com.gestionlicencias.gestionlicenciasconducir.Exception.ExisteDocumentoException;
 
 public class TitularServiceImplTest {
 
@@ -38,13 +39,13 @@ public class TitularServiceImplTest {
     }
 
     @Test
-    void testCrearTitularExitoso() {
+    void testCrearTitularExitoso() throws ExisteDocumentoException {
         // Configurar el mock para que no exista un titular con el mismo documento
         when(titularRepository.existsByDocumento("12345678")).thenReturn(false);
         when(titularRepository.save(titular)).thenReturn(titular);
 
         // Llamar al método crearTitular
-        Titular resultado = titularService.crearTitular(titular);
+        Titular resultado = titularService.registrarTitular(titular);
 
         // Verificar que el titular se creó correctamente
         assertNotNull(resultado, "El titular no debería ser nulo");
@@ -58,8 +59,8 @@ public class TitularServiceImplTest {
         when(titularRepository.existsByDocumento("12345678")).thenReturn(true);
 
         // Verificar que se lanza una excepción al intentar crear un titular duplicado
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            titularService.crearTitular(titular);
+        Exception exception = assertThrows(ExisteDocumentoException.class, () -> {
+            titularService.registrarTitular(titular);
         });
 
         assertEquals("Ya existe un titular con documento 12345678", exception.getMessage());
