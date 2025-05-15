@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Licencia</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f3f7fb;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    form {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #0b3d91;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 18px;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    label.required::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #fdfdfd;
+    }
+
+    textarea {
+      resize: none;
+      height: 40px;
+    }
+
+    .input-error {
+      border: 2px solid red !important;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 13px;
+      display: none;
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: block;
+      margin: 30px auto 0;
+      background-color: #0b84ff;
+      color: white;
+      padding: 12px 24px;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0964c9;
+    }
+
+    .readonly-box {
+      padding: 1px 12px;
+      font-size: 15px;
+      background-color: #eef2f7;
+      border: 1px solid #d3dce6;
+      border-radius: 6px;
+      color: #333;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+<form id="formLicencia" onsubmit="return validarLicencia()" novalidate>
+  <h2>Registro de Licencia</h2>
+
+  <div class="form-group">
+    <label for="tipoDocumento" class="required">Tipo de documento del titular</label>
+    <select id="tipoDocumento" name="tipoDocumento" required>
+      <option value="">Seleccione...</option>
+      <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
+        <option th:value="${tipo}" th:text="${tipo}"></option>
+      </th:block>
+    </select>
+    <div class="error-message">Este campo es obligatorio.</div>
+  </div>
+
+  <div class="form-group">
+    <label for="numeroDocumento" class="required">Número de documento del titular</label>
+    <input type="text" id="numeroDocumento" name="numeroDocumento" maxlength="8" required>
+    <div class="error-message">Este campo es obligatorio.</div>
+  </div>
+
+  <div class="form-group">
+    <label for="claseLicencia" class="required">Clase de licencia</label>
+    <select id="claseLicencia" name="claseLicencia" required>
+      <option value="">Seleccione...</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+    </select>
+    <div class="error-message">Este campo es obligatorio.</div>
+  </div>
+
+  <div class="form-group">
+    <label for="limitaciones" style="display:inline; font-weight: bold; color: #333;">Limitaciones <span style="color: #888;">(opcional)</span></label>
+    <textarea id="limitaciones" name="limitaciones" maxlength="100" placeholder=""></textarea>
+  </div>
+
+  <!-- Campos solo lectura en estilo visual -->
+  <div class="form-group">
+    <label for="nombreApellido">Nombre y apellido del titular</label>
+    <div class="readonly-box" th:text="${(nombre ?: '') + ' ' + (apellido ?: '')}"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="edad">Edad del titular</label>
+    <div class="readonly-box" th:text="${edad}"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="fechaEmision">Fecha de emisión de la licencia</label>
+    <div class="readonly-box" th:text="${fechaActual}"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="fechaVencimiento">Fecha de vencimiento de la licencia</label>
+    <div class="readonly-box" th:text="${fechaVencimiento}"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="costo">Costo</label>
+    <div class="readonly-box" th:text="${costo}"></div>
+  </div>
+
+  <button type="submit" class="btn">Registrar licencia</button>
+</form>
+
+<script>
+  function validarLicencia() {
+    const tipoDoc = document.getElementById('tipoDocumento');
+    const numeroDoc = document.getElementById('numeroDocumento');
+    const claseLicencia = document.getElementById('claseLicencia');
+    let valido = true;
+    let tieneCamposVacios = false;
+
+    [tipoDoc, numeroDoc, claseLicencia].forEach(field => {
+      field.classList.remove('input-error');
+      const errorMsg = field.parentElement.querySelector('.error-message');
+      if (errorMsg) errorMsg.style.display = 'none';
+    });
+
+    if (tipoDoc.value === "") {
+      tipoDoc.classList.add('input-error');
+      tipoDoc.parentElement.querySelector('.error-message').style.display = 'block';
+      valido = false;
+      tieneCamposVacios = true;
+    }
+
+    const valorDoc = numeroDoc.value.trim();
+    if (valorDoc === "") {
+      numeroDoc.classList.add('input-error');
+      numeroDoc.parentElement.querySelector('.error-message').style.display = 'block';
+      valido = false;
+      tieneCamposVacios = true;
+    } else {
+      if (tipoDoc.value === "DNI" && !/^\d{8}$/.test(valorDoc)) {
+        alert("El DNI debe tener exactamente 8 dígitos numéricos.");
+        numeroDoc.classList.add('input-error');
+        valido = false;
+      } else if (tipoDoc.value !== "DNI" && !/^[a-zA-Z0-9]{8}$/.test(valorDoc)) {
+        alert("El número de documento debe tener 8 caracteres alfanuméricos.");
+        numeroDoc.classList.add('input-error');
+        valido = false;
+      }
+    }
+
+    if (claseLicencia.value === "") {
+      claseLicencia.classList.add('input-error');
+      claseLicencia.parentElement.querySelector('.error-message').style.display = 'block';
+      valido = false;
+      tieneCamposVacios = true;
+    }
+
+    if (tieneCamposVacios) {
+      alert('Por favor, complete todos los campos obligatorios.');
+      return false;
+    }
+
+    if (!valido) return false;
+
+    return confirm('¿Está seguro de que desea registrar la licencia?');
+  }
+</script>
+
+</body>
+</html>

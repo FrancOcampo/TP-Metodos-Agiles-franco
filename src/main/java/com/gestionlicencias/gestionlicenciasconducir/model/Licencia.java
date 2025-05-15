@@ -26,6 +26,9 @@ public class Licencia {
     @Column(name = "esta_vigente", nullable = false)
     private Boolean estaVigente;
 
+    @Column(name = "observaciones", length = 100)
+    private String observaciones;
+
     @ManyToOne
     @JoinColumn(name = "id_titular", nullable = false)
     private Titular titular;
@@ -79,5 +82,13 @@ public class Licencia {
 
     public void setTitular(Titular titular) {
         this.titular = titular;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }

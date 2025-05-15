@@ -78,7 +78,7 @@ public class LicenciaServiceImpl implements LicenciaService {
     }
 
     /*
-    public Licencia emitirLicencia(Titular titular, String claseLicencia) throws ClaseEmisionInvalidaException {
+    public Licencia emitirLicencia(Titular titular, String claseLicencia, String observaciones) throws ClaseEmisionInvalidaException {
 
         // Obtener las licencias del titular
         List<Licencia> licenciasTitular = titular.getLicencias();
@@ -102,6 +102,7 @@ public class LicenciaServiceImpl implements LicenciaService {
             nuevaLicencia.setTitular(titular);
             nuevaLicencia.setClase(claseLicencia);
             nuevaLicencia.setEstaVigente(true);
+            nuevaLicencia.setObservaciones(observaciones);
             nuevaLicencia.setFechaInicio(java.sql.Date.valueOf(java.time.LocalDate.now()));
 
             // Calcular años de vigencia
