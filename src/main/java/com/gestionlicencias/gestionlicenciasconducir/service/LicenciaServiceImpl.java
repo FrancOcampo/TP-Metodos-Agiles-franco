@@ -1,5 +1,8 @@
 package com.gestionlicencias.gestionlicenciasconducir.service;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,6 +76,7 @@ public class LicenciaServiceImpl implements LicenciaService {
 
         return costo;
     }
+
     /*
     public Licencia emitirLicencia(Titular titular, String claseLicencia) throws ClaseEmisionInvalidaException {
 
@@ -100,8 +104,57 @@ public class LicenciaServiceImpl implements LicenciaService {
             nuevaLicencia.setEstaVigente(true);
             nuevaLicencia.setFechaInicio(java.sql.Date.valueOf(java.time.LocalDate.now()));
 
+            // Calcular años de vigencia
+            int aniosVigencia = calcularVigenciaLicencia(titular, claseLicencia);
+
+            // Año de vencimiento = año actual + años de vigencia
+            int anioVencimiento = nuevaLicencia.getFechaInicio().getYear() + aniosVigencia;
+
+            // Fecha de vencimiento = cumpleaños del titular en el año de vencimiento
+            LocalDate fechaVencimiento = LocalDate.of(
+                anioVencimiento,
+                titular.getFechaNacimiento.getMonth(),
+                titular.getFechaNacimiento.getDayOfMonth()
+            );
+
+            nuevaLicencia.setFechaVencimiento(java.sql.Date.valueOf(fechaVencimiento));
+        );
+
             return nuevaLicencia;
         }
     */
+
+    public int calcularVigenciaLicencia(Titular titular, String claseLicencia) {
+
+        LocalDate fechaNacimientoTitular = titular.getFechaNacimiento().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        int edadTitular = Period.between(fechaNacimientoTitular, LocalDate.now()).getYears();
+
+        int aniosVigencia = 0;
+
+        if(edadTitular < 21) {
+            boolean renovacion = false;
+            
+            for(Licencia L : titular.getLicencias()) {
+                if(L.getClase().equalsIgnoreCase(claseLicencia)) {
+                    renovacion = true;
+                    break;
+                }
+            }
+
+            if(renovacion) aniosVigencia = 3; 
+            else aniosVigencia = 1;
+
+        }
+
+        else if(edadTitular > 21 && edadTitular <= 46) aniosVigencia = 5;
+
+        else if(edadTitular > 46 && edadTitular <= 60) aniosVigencia = 4;
+
+        else if(edadTitular > 60 && edadTitular <= 70) aniosVigencia = 3;
+
+        else if(edadTitular > 70) aniosVigencia = 1;
+
+        return aniosVigencia;
+    }
 
 }
