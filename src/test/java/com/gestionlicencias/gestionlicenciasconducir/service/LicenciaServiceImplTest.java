@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseVigenciaInvalidaException;
-
 class LicenciaServiceImplTest {
 
     private LicenciaService licenciaService;
@@ -41,7 +39,7 @@ class LicenciaServiceImplTest {
         "G, 3, 33.0",  // 8 + 25
         "G, 1, 28.0"   // 8 + 20
     })
-    void calcularCostoLicencia_casoValido_retornaCostoEsperado(String clase, int vigencia, float costoEsperado) throws ClaseVigenciaInvalidaException {
+    void calcularCostoLicencia_casoValido_retornaCostoEsperado(String clase, int vigencia, float costoEsperado) {
         float costoCalculado = licenciaService.calcularCostoLicencia(clase, vigencia);
         assertEquals(costoEsperado, costoCalculado, 0.01, 
             "El costo calculado para clase " + clase + " y vigencia " + vigencia + " años debe ser " + costoEsperado);
@@ -49,8 +47,8 @@ class LicenciaServiceImplTest {
 
     @Test
     void calcularCostoLicencia_claseInvalida_lanzaExcepcion() {
-        ClaseVigenciaInvalidaException exception = assertThrows(
-            ClaseVigenciaInvalidaException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> licenciaService.calcularCostoLicencia("X", 5),
             "Debería lanzar excepción para clase inválida"
         );
@@ -60,8 +58,8 @@ class LicenciaServiceImplTest {
 
     @Test
     void calcularCostoLicencia_vigenciaInvalida_lanzaExcepcion() {
-        ClaseVigenciaInvalidaException exception = assertThrows(
-            ClaseVigenciaInvalidaException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> licenciaService.calcularCostoLicencia("A", 2),
             "Debería lanzar excepción para vigencia inválida"
         );
@@ -70,7 +68,7 @@ class LicenciaServiceImplTest {
     }
 
     @Test
-    void calcularCostoLicencia_claseMinuscula_funcionaCorrectamente() throws ClaseVigenciaInvalidaException {
+    void calcularCostoLicencia_claseMinuscula_funcionaCorrectamente() {
         float costoCalculado = licenciaService.calcularCostoLicencia("a", 5);
         assertEquals(48.0, costoCalculado, 0.01, 
             "El costo debe ser calculado correctamente independientemente de mayúsculas/minúsculas");
@@ -78,8 +76,8 @@ class LicenciaServiceImplTest {
 
     @Test
     void calcularCostoLicencia_claseNula_lanzaExcepcion() {
-        ClaseVigenciaInvalidaException exception = assertThrows(
-            ClaseVigenciaInvalidaException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> licenciaService.calcularCostoLicencia(null, 5),
             "Debería lanzar excepción para clase nula"
         );
@@ -89,8 +87,8 @@ class LicenciaServiceImplTest {
 
     @Test
     void calcularCostoLicencia_vigenciaNula_lanzaExcepcion() {
-        ClaseVigenciaInvalidaException exception = assertThrows(
-            ClaseVigenciaInvalidaException.class,
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
             () -> licenciaService.calcularCostoLicencia("A", null),
             "Debería lanzar excepción para vigencia nula"
         );

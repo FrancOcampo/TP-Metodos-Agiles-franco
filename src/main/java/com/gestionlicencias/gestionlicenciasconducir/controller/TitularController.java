@@ -8,10 +8,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
-import com.gestionlicencias.gestionlicenciasconducir.Exception.ExisteDocumentoException;
+import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 
+/*Estas son anotaciones para la documentación de la API
+ * Ingresar a http://localhost:8080/swagger-ui/index.html para ver la documentación de la API
+*/
+@Tag(name = "Titular Controller", description = "Operaciones para la gestión de titulares")
 @Controller
 @RequestMapping("/api/titulares")
 public class TitularController {
@@ -23,14 +30,17 @@ public class TitularController {
         this.service = service;
     }
 
+    @Operation(summary = "Registrar un titular", 
+                description = "Registra un nuevo titular en la base de datos", 
+                responses = {
+                    @ApiResponse(responseCode = "201", description = "Titular registrado correctamente"),
+                    @ApiResponse(responseCode = "400", description = "Error al registrar el titular"),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                })
     @PostMapping("/registrar")
-    public ResponseEntity<Titular> registrarTitular(@RequestBody Titular titular) {
-        try {
-            Titular creado = service.registrarTitular(titular);
-            return ResponseEntity.ok(creado);
-        } catch (ExisteDocumentoException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+    public ResponseEntity<Void> registrarTitular(@RequestBody @Valid TitularRecord titularRecord) {
+        service.registrarTitular(titularRecord);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
     
     //Endpoints para el front

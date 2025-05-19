@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.repository.TitularRepository;
-import com.gestionlicencias.gestionlicenciasconducir.Exception.ExisteDocumentoException;
+import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 
 @Service
 public class TitularServiceImpl implements TitularService {
@@ -22,11 +22,14 @@ public class TitularServiceImpl implements TitularService {
 
     @Override
     @Transactional
-    public Titular registrarTitular(Titular titular) throws ExisteDocumentoException {
-        if (repository.existsByDocumento(titular.getDocumento())) {
-            throw new ExisteDocumentoException(
-                "Ya existe un titular con documento " + titular.getDocumento());
+    public Titular registrarTitular(TitularRecord titularRecord) {
+        // Verificar si ya existe un titular con el mismo documento
+        if (repository.existsByDocumento(titularRecord.getDocumento())) {
+            throw new IllegalArgumentException("Ya existe un titular con documento: " + titularRecord.getDocumento());
         }
+        // Convertir el DTO a entidad
+        Titular titular = titularRecord.toTitular();
+        // Guardar el titular en la base de datos
         return repository.save(titular);
     }
 

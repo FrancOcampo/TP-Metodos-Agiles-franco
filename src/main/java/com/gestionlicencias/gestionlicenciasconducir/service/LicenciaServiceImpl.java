@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
-import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseVigenciaInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 
@@ -20,23 +18,23 @@ public class LicenciaServiceImpl implements LicenciaService {
     private static final List<Integer> VIGENCIAS_VALIDAS = Arrays.asList(1, 3, 4, 5);
 
     @Override
-    public Float calcularCostoLicencia(String clase, Integer vigencia) throws ClaseVigenciaInvalidaException {
+    public Float calcularCostoLicencia(String clase, Integer vigencia) {
         // Validar valores nulos
         if (clase == null) {
-            throw new ClaseVigenciaInvalidaException("Clase de licencia no válida. Las clases válidas son: A, B, C, E, G");
+            throw new IllegalArgumentException("Clase de licencia no válida. Las clases válidas son: A, B, C, E, G");
         }
         if (vigencia == null) {
-            throw new ClaseVigenciaInvalidaException("Vigencia no válida. Las vigencias válidas son: 1, 3, 4, 5 años");
+            throw new IllegalArgumentException("Vigencia no válida. Las vigencias válidas son: 1, 3, 4, 5 años");
         }
 
         // Validar clase
         if (!CLASES_VALIDAS.contains(clase.toUpperCase())) {
-            throw new ClaseVigenciaInvalidaException("Clase de licencia no válida. Las clases válidas son: A, B, C, E, G");
+            throw new IllegalArgumentException("Clase de licencia no válida. Las clases válidas son: A, B, C, E, G");
         }
 
         // Validar vigencia
         if (!VIGENCIAS_VALIDAS.contains(vigencia)) {
-            throw new ClaseVigenciaInvalidaException("Vigencia no válida. Las vigencias válidas son: 1, 3, 4, 5 años");
+            throw new IllegalArgumentException("Vigencia no válida. Las vigencias válidas son: 1, 3, 4, 5 años");
         }
 
         Float costo = 8.00f;
