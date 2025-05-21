@@ -101,6 +101,17 @@
       display: flex;
       align-items: center;
     }
+
+    .btn-buscar {
+      background-color: #0aa056;
+      margin: 0;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
+
+    .btn-buscar:hover {
+      background-color: #087a45;
+    }
   </style>
 </head>
 <body>
@@ -125,9 +136,13 @@
     <div class="error-message">Este campo es obligatorio.</div>
   </div>
 
+  <div style="text-align:right; margin-top: 25px; margin-bottom: 25px;">
+    <button type="button" class="btn btn-buscar" onclick="buscarTitular()">Buscar titular</button>
+  </div>
+
   <div class="form-group">
     <label for="claseLicencia" class="required">Clase de licencia</label>
-    <select id="claseLicencia" name="claseLicencia" required>
+    <select id="claseLicencia" name="claseLicencia" required disabled>
       <option value="">Seleccione...</option>
       <option value="A">A</option>
       <option value="B">B</option>
@@ -142,11 +157,11 @@
 
   <div class="form-group">
     <label for="limitaciones" style="display:inline; font-weight: bold; color: #333;">Limitaciones <span style="color: #888;">(opcional)</span></label>
-    <textarea id="limitaciones" name="limitaciones" maxlength="100" placeholder=""></textarea>
+    <textarea id="limitaciones" name="limitaciones" maxlength="100" placeholder="" disabled></textarea>
   </div>
 
   <!-- Campos solo lectura en estilo visual -->
-  <div class="form-group">
+  <!--<div class="form-group">
     <label for="nombreApellido">Nombre y apellido del titular</label>
     <div class="readonly-box" th:text="${(nombre ?: '') + ' ' + (apellido ?: '')}"></div>
   </div>
@@ -169,49 +184,22 @@
   <div class="form-group">
     <label for="costo">Costo</label>
     <div class="readonly-box" th:text="${costo}"></div>
-  </div>
+  </div>-->
 
-  <button type="submit" class="btn">Registrar licencia</button>
+  <button type="submit" class="btn" id="btnRegistrar" disabled>Registrar licencia</button>
 </form>
 
 <script>
   function validarLicencia() {
-    const tipoDoc = document.getElementById('tipoDocumento');
-    const numeroDoc = document.getElementById('numeroDocumento');
     const claseLicencia = document.getElementById('claseLicencia');
     let valido = true;
     let tieneCamposVacios = false;
 
-    [tipoDoc, numeroDoc, claseLicencia].forEach(field => {
+    [claseLicencia].forEach(field => {
       field.classList.remove('input-error');
       const errorMsg = field.parentElement.querySelector('.error-message');
       if (errorMsg) errorMsg.style.display = 'none';
     });
-
-    if (tipoDoc.value === "") {
-      tipoDoc.classList.add('input-error');
-      tipoDoc.parentElement.querySelector('.error-message').style.display = 'block';
-      valido = false;
-      tieneCamposVacios = true;
-    }
-
-    const valorDoc = numeroDoc.value.trim();
-    if (valorDoc === "") {
-      numeroDoc.classList.add('input-error');
-      numeroDoc.parentElement.querySelector('.error-message').style.display = 'block';
-      valido = false;
-      tieneCamposVacios = true;
-    } else {
-      if (tipoDoc.value === "DNI" && !/^\d{8}$/.test(valorDoc)) {
-        alert("El DNI debe tener exactamente 8 dígitos numéricos.");
-        numeroDoc.classList.add('input-error');
-        valido = false;
-      } else if (tipoDoc.value !== "DNI" && !/^[a-zA-Z0-9]{8}$/.test(valorDoc)) {
-        alert("El número de documento debe tener 8 caracteres alfanuméricos.");
-        numeroDoc.classList.add('input-error');
-        valido = false;
-      }
-    }
 
     if (claseLicencia.value === "") {
       claseLicencia.classList.add('input-error');
@@ -229,6 +217,53 @@
 
     return confirm('¿Está seguro de que desea registrar la licencia?');
   }
+
+  function buscarTitular() {
+    const tipoDoc = document.getElementById('tipoDocumento');
+    const numeroDoc = document.getElementById('numeroDocumento');
+    const claseLicencia = document.getElementById('claseLicencia');
+    const limitaciones = document.getElementById('limitaciones');
+    const btnRegistrar = document.getElementById('btnRegistrar');
+
+    // Limpia errores anteriores
+    tipoDoc.classList.remove('input-error');
+    numeroDoc.classList.remove('input-error');
+
+    // Validación de campos obligatorios
+    if (tipoDoc.value === "") {
+      alert("Debe seleccionar un tipo de documento.");
+      tipoDoc.classList.add('input-error');
+      return;
+    }
+
+    const valorDoc = numeroDoc.value.trim();
+    if (valorDoc === "") {
+      alert("Debe ingresar un número de documento.");
+      numeroDoc.classList.add('input-error');
+      return;
+    }
+
+    // Validación del formato según tipo de documento
+    if (tipoDoc.value === "DNI" && !/^\d{8}$/.test(valorDoc)) {
+      alert("El DNI debe tener exactamente 8 dígitos numéricos.");
+      numeroDoc.classList.add('input-error');
+      return;
+    } else if (tipoDoc.value !== "DNI" && !/^[a-zA-Z0-9]{8}$/.test(valorDoc)) {
+      alert("El número de documento debe tener 8 caracteres alfanuméricos.");
+      numeroDoc.classList.add('input-error');
+      return;
+    }
+
+    console.log("Buscando titular con", tipoDoc.value, numeroDoc.value);
+
+    // Si pasa todas las validaciones, habilita los campos
+    claseLicencia.disabled = false;
+    limitaciones.disabled = false;
+    btnRegistrar.disabled = false;
+
+    alert("Titular encontrado. Complete los demás campos para registrar la licencia.");
+  }
+
 </script>
 
 </body>
