@@ -46,7 +46,7 @@ class TitularServiceImplTest {
         );
 
         Titular titularEsperado = titularRecord.toTitular();
-        when(titularRepository.existsByDocumento("12345678")).thenReturn(false);
+        when(titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678")).thenReturn(false);
         when(titularRepository.save(any(Titular.class))).thenReturn(titularEsperado);
 
         // Act
@@ -54,6 +54,7 @@ class TitularServiceImplTest {
 
         // Assert
         assertNotNull(titularCreado);
+        assertEquals(titularRecord.tipoDocumento(), titularCreado.getTipoDocumento());
         assertEquals(titularRecord.documento(), titularCreado.getDocumento());
         assertEquals(titularRecord.nombre(), titularCreado.getNombre());
         assertEquals(titularRecord.apellido(), titularCreado.getApellido());
@@ -64,7 +65,7 @@ class TitularServiceImplTest {
         assertEquals(titularRecord.donanteOrganos(), titularCreado.getDonanteOrganos());
 
         // Verify
-        verify(titularRepository).existsByDocumento("12345678");
+        verify(titularRepository).existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678");
         verify(titularRepository).save(any(Titular.class));
     }
 
@@ -83,7 +84,7 @@ class TitularServiceImplTest {
             true
         );
 
-        when(titularRepository.existsByDocumento("12345678")).thenReturn(true);
+        when(titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678")).thenReturn(true);
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
@@ -92,10 +93,10 @@ class TitularServiceImplTest {
             "Debería lanzar excepción cuando el documento ya existe"
         );
 
-        assertTrue(exception.getMessage().contains("Ya existe un titular con documento: 12345678"));
+        assertTrue(exception.getMessage().contains("Ya existe un titular con documento: 12345678 y tipo de documento: DNI"));
 
         // Verify
-        verify(titularRepository).existsByDocumento("12345678");
+        verify(titularRepository).existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678");
         verify(titularRepository, never()).save(any(Titular.class));
     }
 }

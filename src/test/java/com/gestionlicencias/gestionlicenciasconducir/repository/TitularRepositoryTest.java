@@ -37,13 +37,16 @@ public class TitularRepositoryTest {
     }
 
     @Test
-    void testExistsByDocumento() {
-        // Verificar que el método existsByDocumento funciona correctamente
-        boolean exists = titularRepository.existsByDocumento("12345678");
-        assertTrue(exists, "El titular con documento 12345678 debería existir en la base de datos");
+    void testExistsByTipoDocumentoAndDocumento() {
+        // Verificar que el método existsByTipoDocumentoAndDocumento funciona correctamente
+        boolean exists = titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678");
+        assertTrue(exists, "El titular con DNI 12345678 debería existir en la base de datos");
 
-        boolean notExists = titularRepository.existsByDocumento("87654321");
-        assertFalse(notExists, "El titular con documento 87654321 no debería existir en la base de datos");
+        boolean notExists = titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "87654321");
+        assertFalse(notExists, "El titular con DNI 87654321 no debería existir en la base de datos");
+
+        boolean notExistsDifferentType = titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.PASAPORTE, "12345678");
+        assertFalse(notExistsDifferentType, "No debería existir un titular con pasaporte 12345678");
     }
 
     @Test

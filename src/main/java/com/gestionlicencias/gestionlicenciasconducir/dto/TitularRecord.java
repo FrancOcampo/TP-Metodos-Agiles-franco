@@ -58,4 +58,7 @@ public record TitularRecord(
     public String getDocumento() {
         return documento;
     }
+    public TipoDocumento getTipoDocumento() {
+        return tipoDocumento;
+    }
 }

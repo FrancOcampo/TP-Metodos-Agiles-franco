@@ -24,8 +24,8 @@ public class TitularServiceImpl implements TitularService {
     @Transactional
     public Titular registrarTitular(TitularRecord titularRecord) {
         // Verificar si ya existe un titular con el mismo documento
-        if (repository.existsByDocumento(titularRecord.getDocumento())) {
-            throw new IllegalArgumentException("Ya existe un titular con documento: " + titularRecord.getDocumento());
+        if (repository.existsByTipoDocumentoAndDocumento(titularRecord.getTipoDocumento(), titularRecord.getDocumento())) {
+            throw new IllegalArgumentException("Ya existe un titular con documento: " + titularRecord.getDocumento() + " y tipo de documento: " + titularRecord.getTipoDocumento());
         }
         // Convertir el DTO a entidad
         Titular titular = titularRecord.toTitular();
