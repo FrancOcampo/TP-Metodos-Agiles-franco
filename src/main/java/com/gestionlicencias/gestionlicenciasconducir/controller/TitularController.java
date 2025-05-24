@@ -8,13 +8,17 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
+import com.gestionlicencias.gestionlicenciasconducir.dto.TitularDTO;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 
@@ -59,45 +63,54 @@ public class TitularController {
     public String mostrarMenu() {  return "menuTitular";    }
 
     @GetMapping("/registroTitular")
-    public String mostrarFormulario() {   return "registroTitular";    }
-
+    public String mostrarFormulario(Model model) {
+        if (!model.containsAttribute("titularDTO")) {
+            model.addAttribute("titularDTO", new TitularDTO());
+        }
+        return "registroTitular";
+    }
+    
     @PostMapping("/registrar")
     public String registrarTitular(
-        @RequestParam TipoDocumento tipoDocumento,
-        @RequestParam String numeroDocumento,
-        @RequestParam String nombre,
-        @RequestParam String apellido,
-        @RequestParam String direccion,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaNacimiento,
-        @RequestParam String grupoSanguineo,
-        @RequestParam String factorRH,
-        @RequestParam(required = false, defaultValue = "false") boolean donante,
+        @Valid @ModelAttribute("titularDTO") TitularDTO titularDTO,
+        BindingResult bindingResult,
+        Model model,
         RedirectAttributes redirectAttributes
     ) {
-        try {
-            java.sql.Date fechaNacimientoSql = java.sql.Date.valueOf(fechaNacimiento);
+        if (bindingResult.hasErrors()) {
+            // Si hay errores de validación, se vuelve al formulario con los datos cargados
+            return "registroTitular";
+        }
 
+        try {
+            // Conversión si el DTO usa java.util.Date
+            java.sql.Date fechaNacimientoSql = new java.sql.Date(titularDTO.getFechaNacimiento().getTime());
+
+            // Construcción del DTO que usa el servicio (si es diferente al de formulario)
             TitularRecord dto = new TitularRecord(
-                tipoDocumento,
-                numeroDocumento,
-                nombre,
-                apellido,
+                titularDTO.getTipoDocumento(),
+                titularDTO.getDocumento(),
+                titularDTO.getNombre(),
+                titularDTO.getApellido(), 
                 fechaNacimientoSql,
-                direccion,
-                grupoSanguineo,
-                factorRH,
-                donante
+                titularDTO.getDireccion(),
+                titularDTO.getGrupoSanguineo(),
+                titularDTO.getFactorRH(),
+                titularDTO.getDonanteOrganos()
             );
+
             service.registrarTitular(dto);
             redirectAttributes.addFlashAttribute("successMessage", "Titular registrado exitosamente.");
+            return "redirect:/api/titulares/registroTitular";
 
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-
+            model.addAttribute("errorMessage", e.getMessage());
+            return "registroTitular";
+            
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error al registrar el titular.");
+            model.addAttribute("errorMessage", "Ocurrió un error al registrar el titular.");
+            return "registroTitular";
         }
-        return "redirect:/api/titulares/registroTitular";
     }
 
     @GetMapping("/modificar")
