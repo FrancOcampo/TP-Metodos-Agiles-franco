@@ -83,10 +83,8 @@ public class TitularController {
         }
 
         try {
-            // Conversión si el DTO usa java.util.Date
             java.sql.Date fechaNacimientoSql = new java.sql.Date(titularDTO.getFechaNacimiento().getTime());
 
-            // Construcción del DTO que usa el servicio (si es diferente al de formulario)
             TitularRecord dto = new TitularRecord(
                 titularDTO.getTipoDocumento(),
                 titularDTO.getDocumento(),
