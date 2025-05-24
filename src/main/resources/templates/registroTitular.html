@@ -153,12 +153,51 @@
     .btn:hover {
       background-color: #0964c9;
     }
+
+    .alert {
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 15px;
+      position: relative;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .alert .close-btn {
+      position: absolute;
+      right: 12px;
+      top: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
   </style>
 </head>
 <body>
 
-<form id="altaTitularForm" onsubmit="return validarFormulario()" novalidate>
+<form id="altaTitularForm" action="/api/titulares/registrar" method="post" onsubmit="return validarFormulario()" novalidate>
   <h2>Alta de Titular</h2>
+
+  <div th:if="${successMessage}" class="alert alert-success">
+    <span th:text="${successMessage}"></span>
+    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-error">
+    <span th:text="${errorMessage}"></span>
+    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+  </div>
 
   <div class="row">
     <div class="form-group">
