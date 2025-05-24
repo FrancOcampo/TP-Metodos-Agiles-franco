@@ -34,22 +34,17 @@
       margin-bottom: 18px;
     }
 
+    /* Poner asterisco solo en labels dentro de .form-group */
+    .form-group label[for]::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
+    }
+
     label {
       margin-bottom: 5px;
       font-weight: bold;
       color: #333;
-    }
-
-    /* Quitar asterisco solo para label del checkbox */
-    label[for="donanteOrganos"]::after {
-      content: none;
-    }
-
-    /* Asterisco para otros labels */
-    label[for]:not([for="donanteOrganos"])::after {
-      content: '*';
-      color: red;
-      margin-left: 4px;
     }
 
     input[type="text"],
@@ -84,32 +79,26 @@
       flex: 1;
     }
 
-    /* Estilo para el checkbox con texto a la izquierda */
-    .form-group.checkbox-group {
-      flex-direction: row;
-      align-items: center;
-      margin-bottom: 25px;
-    }
-
-    .form-group.checkbox-group label {
-      font-weight: normal;
-      color: #333;
-      cursor: pointer;
+    /* Nuevo estilo para el contenedor del checkbox */
+    .checkbox-container {
       display: flex;
       align-items: center;
-      user-select: none;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      gap: 10px;
     }
 
-    .form-group.checkbox-group label span {
-      margin-right: 8px;
-      font-weight: normal;
-    }
-
-    .form-group.checkbox-group input[type="checkbox"] {
+    .checkbox-container label {
+      font-weight: bold;
+      color: #333;
       margin: 0;
-      transform: scale(1.2);
+      /* No asterisco aquí */
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
       cursor: pointer;
-      vertical-align: middle;
     }
 
     .btn {
@@ -156,207 +145,202 @@
       cursor: pointer;
       font-weight: bold;
     }
-
   </style>
 </head>
 <body>
+  <form id="altaTitularForm"
+        th:action="@{/api/titulares/registrar}"
+        th:object="${titularDTO}"
+        method="post"
+        onsubmit="return validarFormulario()"
+        novalidate>
+    <h2>Alta de Titular</h2>
 
-<form id="altaTitularForm"
-      th:action="@{/api/titulares/registrar}"
-      th:object="${titularDTO}"
-      method="post"
-      onsubmit="return validarFormulario()"
-      novalidate>
-  <h2>Alta de Titular</h2>
-
-  <div th:if="${successMessage}" class="alert alert-success">
-    <span th:text="${successMessage}"></span>
-    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-  </div>
-
-  <div th:if="${errorMessage}" class="alert alert-error">
-    <span th:text="${errorMessage}"></span>
-    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-  </div>
-
-  <div class="row">
-    <div class="form-group">
-      <label for="tipoDocumento">Tipo de documento</label>
-      <select th:field="*{tipoDocumento}" required id="tipoDocumento">
-        <option value="">Seleccione...</option>
-        <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
-          <option th:value="${tipo}" th:text="${tipo}"></option>
-        </th:block>
-      </select>
-      <div class="error-message">Este campo es obligatorio.</div>
+    <div th:if="${successMessage}" class="alert alert-success">
+      <span th:text="${successMessage}"></span>
+      <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
     </div>
 
-    <div class="form-group">
-      <label for="documento">Número de documento</label>
-      <input type="text" th:field="*{documento}" maxlength="8" required id="documento">
-      <div class="error-message">Este campo es obligatorio.</div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="form-group">
-      <label for="apellido">Apellido/s</label>
-      <input type="text" th:field="*{apellido}" maxlength="50" required id="apellido">
-      <div class="error-message">Este campo es obligatorio.</div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+      <span th:text="${errorMessage}"></span>
+      <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
     </div>
 
-    <div class="form-group">
-      <label for="nombre">Nombre/s</label>
-      <input type="text" th:field="*{nombre}" maxlength="50" required id="nombre">
-      <div class="error-message">Este campo es obligatorio.</div>
-    </div>
-  </div>
+    <div class="row">
+      <div class="form-group">
+        <label for="tipoDocumento">Tipo de documento</label>
+        <select th:field="*{tipoDocumento}" required>
+          <option value="">Seleccione...</option>
+          <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
+            <option th:value="${tipo}" th:text="${tipo}"></option>
+          </th:block>
+        </select>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
 
-  <div class="row">
-    <div class="form-group">
-      <label for="fechaNacimiento">Fecha de nacimiento</label>
-      <input type="date" th:field="*{fechaNacimiento}" required id="fechaNacimiento">
-      <div class="error-message">Este campo es obligatorio.</div>
-    </div>
-
-    <div class="form-group">
-      <label for="direccion">Dirección</label>
-      <input type="text" th:field="*{direccion}" maxlength="100" required id="direccion">
-      <div class="error-message">Este campo es obligatorio.</div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="form-group">
-      <label for="grupoSanguineo">Grupo sanguíneo</label>
-      <select th:field="*{grupoSanguineo}" required id="grupoSanguineo">
-        <option value="">Seleccione...</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="AB">AB</option>
-        <option value="O">O</option>
-      </select>
-      <div class="error-message">Este campo es obligatorio.</div>
+      <div class="form-group">
+        <label for="documento">Número de documento</label>
+        <input type="text" th:field="*{documento}" maxlength="8" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="factorRH">Factor RH</label>
-      <select th:field="*{factorRH}" required id="factorRH">
-        <option value="">Seleccione...</option>
-        <option value="+">Positivo (+)</option>
-        <option value="-">Negativo (-)</option>
-      </select>
-      <div class="error-message">Este campo es obligatorio.</div>
+    <div class="row">
+      <div class="form-group">
+        <label for="apellido">Apellido/s</label>
+        <input type="text" th:field="*{apellido}" maxlength="50" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre/s</label>
+        <input type="text" th:field="*{nombre}" maxlength="50" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
     </div>
-  </div>
 
-  <div class="form-group checkbox-group">
-    <label for="donanteOrganos">
-      <span>Donante de órganos</span>
-      <input type="checkbox" th:field="*{donanteOrganos}" id="donanteOrganos" />
-    </label>
-  </div>
+    <div class="row">
+      <div class="form-group">
+        <label for="fechaNacimiento">Fecha de nacimiento</label>
+        <input type="date" th:field="*{fechaNacimiento}" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
 
-  <button class="btn" type="submit">Registrar titular</button>
-</form>
+      <div class="form-group">
+        <label for="direccion">Dirección</label>
+        <input type="text" th:field="*{direccion}" maxlength="100" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
+    </div>
 
-<script>
-  function validarFormulario() {
-    const form = document.getElementById('altaTitularForm');
-    const campos = form.querySelectorAll('input[required], select[required]');
-    let valido = true;
-    let tieneCamposVacios = false;
+    <div class="row">
+      <div class="form-group">
+        <label for="grupoSanguineo">Grupo sanguíneo</label>
+        <select th:field="*{grupoSanguineo}" required>
+          <option value="">Seleccione...</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="AB">AB</option>
+          <option value="O">O</option>
+        </select>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
 
-    campos.forEach(campo => {
-      const errorMsg = campo.parentElement.querySelector('.error-message');
-      const vacio = campo.tagName === 'SELECT' ? campo.value === '' : campo.value.trim() === '';
-      campo.classList.remove('input-error');
-      if (errorMsg) errorMsg.style.display = 'none';
+      <div class="form-group">
+        <label for="factorRH">Factor RH</label>
+        <select th:field="*{factorRH}" required>
+          <option value="">Seleccione...</option>
+          <option value="+">Positivo (+)</option>
+          <option value="-">Negativo (-)</option>
+        </select>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
+    </div>
 
-      if (vacio) {
-        campo.classList.add('input-error');
-        if (errorMsg) errorMsg.style.display = 'block';
-        tieneCamposVacios = true;
-        valido = false;
-        return;
-      }
+    <div class="checkbox-container">
+      <label for="donanteOrganos">Donante de órganos</label>
+      <input type="checkbox" id="donanteOrganos" th:field="*{donanteOrganos}" />
+    </div>
 
-      const id = campo.id;
-      const valor = campo.value.trim();
+    <button class="btn" type="submit">Registrar titular</button>
+  </form>
 
-      if (id === 'documento') {
-        const tipo = document.getElementById('tipoDocumento').value;
+  <script>
+    function validarFormulario() {
+      const form = document.getElementById('altaTitularForm');
+      const campos = form.querySelectorAll('input[required], select[required]');
+      let valido = true;
+      let tieneCamposVacios = false;
 
-        if (tipo === 'DNI' && !/^\d{8}$/.test(valor)) {
-          alert('El DNI debe tener exactamente 8 dígitos numéricos.');
+      campos.forEach(campo => {
+        const errorMsg = campo.parentElement.querySelector('.error-message');
+        const vacio = campo.tagName === 'SELECT' ? campo.value === '' : campo.value.trim() === '';
+        campo.classList.remove('input-error');
+        if (errorMsg) errorMsg.style.display = 'none';
+
+        if (vacio) {
           campo.classList.add('input-error');
+          if (errorMsg) errorMsg.style.display = 'block';
+          tieneCamposVacios = true;
           valido = false;
-        } else if (tipo !== 'DNI' && !/^[a-zA-Z0-9]{8}$/.test(valor)) {
-          alert('El número de documento debe tener 8 caracteres alfanuméricos.');
+          return;
+        }
+
+        const id = campo.id;
+        const valor = campo.value.trim();
+
+        if (id === 'numeroDocumento') {
+          const tipo = document.getElementById('tipoDocumento').value;
+
+          if (tipo === 'DNI' && !/^\d{8}$/.test(valor)) {
+            alert('El DNI debe tener exactamente 8 dígitos numéricos.');
+            campo.classList.add('input-error');
+            valido = false;
+          } else if (tipo !== 'DNI' && !/^[a-zA-Z0-9]{8}$/.test(valor)) {
+            alert('El número de documento debe tener 8 caracteres alfanuméricos.');
+            campo.classList.add('input-error');
+            valido = false;
+          }
+        }
+
+        if (id === 'nombre') {
+          if (valor.length > 50) {
+            alert('El nombre no puede superar los 50 caracteres.');
+            campo.classList.add('input-error');
+            valido = false;
+          } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
+            alert('El nombre sólo puede contener letras y espacios.');
+            campo.classList.add('input-error');
+            valido = false;
+          }
+        }
+
+        if (id === 'apellido') {
+          if (valor.length > 50) {
+            alert('El apellido no puede superar los 50 caracteres.');
+            campo.classList.add('input-error');
+            valido = false;
+          } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
+            alert('El apellido sólo puede contener letras y espacios.');
+            campo.classList.add('input-error');
+            valido = false;
+          }
+        }
+
+        if (id === 'direccion' && valor.length > 100) {
+          alert('La dirección no puede superar los 100 caracteres.');
           campo.classList.add('input-error');
           valido = false;
         }
-      }
 
-      if (id === 'nombre') {
-        if (valor.length > 50) {
-          alert('El nombre no puede superar los 50 caracteres.');
-          campo.classList.add('input-error');
-          valido = false;
-        } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
-          alert('El nombre sólo puede contener letras y espacios.');
-          campo.classList.add('input-error');
-          valido = false;
+        if (id === 'fechaNacimiento') {
+          const fechaNac = new Date(valor);
+          const hoy = new Date();
+          const edad = hoy.getFullYear() - fechaNac.getFullYear();
+          const mes = hoy.getMonth() - fechaNac.getMonth();
+          const dia = hoy.getDate() - fechaNac.getDate();
+
+          const tiene17 = edad > 17 || (edad === 17 && (mes > 0 || (mes === 0 && dia >= 0)));
+
+          if (!tiene17) {
+            alert('El titular debe tener al menos 17 años.');
+            campo.classList.add('input-error');
+            valido = false;
+          }
         }
+      });
+
+      if (tieneCamposVacios) {
+        alert('Por favor, complete todos los campos obligatorios.');
+        return false;
       }
 
-      if (id === 'apellido') {
-        if (valor.length > 50) {
-          alert('El apellido no puede superar los 50 caracteres.');
-          campo.classList.add('input-error');
-          valido = false;
-        } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
-          alert('El apellido sólo puede contener letras y espacios.');
-          campo.classList.add('input-error');
-          valido = false;
-        }
+      if (!valido) {
+        return false;
       }
 
-      if (id === 'direccion' && valor.length > 100) {
-        alert('La dirección no puede superar los 100 caracteres.');
-        campo.classList.add('input-error');
-        valido = false;
-      }
-
-      if (id === 'fechaNacimiento') {
-        const fechaNac = new Date(valor);
-        const hoy = new Date();
-        const edad = hoy.getFullYear() - fechaNac.getFullYear();
-        const mes = hoy.getMonth() - fechaNac.getMonth();
-        const dia = hoy.getDate() - fechaNac.getDate();
-
-        const tiene17 = edad > 17 || (edad === 17 && (mes > 0 || (mes === 0 && dia >= 0)));
-
-        if (!tiene17) {
-          alert('El titular debe tener al menos 17 años.');
-          campo.classList.add('input-error');
-          valido = false;
-        }
-      }
-    });
-
-    if (tieneCamposVacios) {
-      alert('Por favor, complete todos los campos obligatorios.');
-      return false;
+      return confirm('¿Está seguro de que desea registrar el titular?');
     }
-
-    if (!valido) {
-      return false;
-    }
-
-    return confirm('¿Está seguro de que desea registrar el titular?');
-  }
-</script>
-
+  </script>
 </body>
 </html>
