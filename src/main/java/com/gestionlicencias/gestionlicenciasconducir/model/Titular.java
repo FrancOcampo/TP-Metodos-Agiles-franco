@@ -45,10 +45,6 @@ public class Titular{
     @Column(name = "donante_organos", nullable = false)
     private Boolean donanteOrganos;
 
-    // Relación uno-a-muchos con Licencia
-    @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Licencia> licencias;
-
     public Titular() {
     }
 
