@@ -3,6 +3,7 @@ package com.gestionlicencias.gestionlicenciasconducir.service;
 import java.util.List;
 
 import com.gestionlicencias.gestionlicenciasconducir.mapper.TitularMapper;
+import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +43,8 @@ public class TitularServiceImpl implements TitularService {
         return repository.findAll();
     }
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public TitularRecord buscarTitular(TipoDocumento tipoDocumento, String documento) {
         Titular titular = repository.findByTipoDocumentoAndDocumento(tipoDocumento, documento)
                 .orElseThrow(() -> new IllegalArgumentException("Titular no encontrado con documento: " + documento + " y tipo de documento: " + tipoDocumento));
