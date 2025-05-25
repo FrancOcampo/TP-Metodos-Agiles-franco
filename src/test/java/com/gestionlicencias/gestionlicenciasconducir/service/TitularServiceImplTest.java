@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDate;
 import java.util.Date;
 
+import com.gestionlicencias.gestionlicenciasconducir.mapper.TitularMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +24,14 @@ class TitularServiceImplTest {
     @Mock
     private TitularRepository titularRepository;
 
+    @Mock
+    private TitularMapper titularMapper;
+
     private TitularService titularService;
 
     @BeforeEach
     void setUp() {
-        titularService = new TitularServiceImpl(titularRepository);
+        titularService = new TitularServiceImpl(titularRepository, titularMapper);
     }
 
     @Test
@@ -45,7 +49,19 @@ class TitularServiceImplTest {
             true
         );
 
-        Titular titularEsperado = titularRecord.toTitular();
+        //Titular titularEsperado = titularRecord.toTitular();
+        Titular titularEsperado = new Titular();
+            titularEsperado.setTipoDocumento(TipoDocumento.DNI);
+            titularEsperado.setDocumento("12345678");
+            titularEsperado.setNombre("Juan");
+            titularEsperado.setApellido("Pérez");
+            titularEsperado.setFechaNacimiento(Date.from(LocalDate.of(1990, 1, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC)));
+            titularEsperado.setDireccion("Calle Principal 123");
+            titularEsperado.setGrupoSanguineo("A");
+            titularEsperado.setFactorRH("Positivo");
+            titularEsperado.setDonanteOrganos(true);
+
+        when(titularMapper.toEntity(titularRecord)).thenReturn(titularEsperado);
         when(titularRepository.existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678")).thenReturn(false);
         when(titularRepository.save(any(Titular.class))).thenReturn(titularEsperado);
 
@@ -65,8 +81,9 @@ class TitularServiceImplTest {
         assertEquals(titularRecord.donanteOrganos(), titularCreado.getDonanteOrganos());
 
         // Verify
+        verify(titularMapper).toEntity(titularRecord);
         verify(titularRepository).existsByTipoDocumentoAndDocumento(TipoDocumento.DNI, "12345678");
-        verify(titularRepository).save(any(Titular.class));
+        verify(titularRepository).save(titularEsperado);
     }
 
     @Test

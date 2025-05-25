@@ -3,6 +3,7 @@ package com.gestionlicencias.gestionlicenciasconducir.model;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +60,9 @@ public class Titular{
     public TipoDocumento getTipoDocumento() {
         return tipoDocumento;
     }
+
+    @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Licencia> licencias = new ArrayList<>();
 
     public void setTipoDocumento(TipoDocumento tipoDocumento) {
         this.tipoDocumento = tipoDocumento;
@@ -129,23 +133,28 @@ public class Titular{
     }
 
     public List<Licencia> getLicencias() {
-        return licencias;
+      return licencias;
     }
 
     public void addLicencia(Licencia licencia) {
-        this.licencias.add(licencia);
         licencia.setTitular(this);
-    }
-    
-    public int getEdad() {
-    if (fechaNacimiento == null) {
-        return 0;
+        this.licencias.add(licencia);
     }
 
-    // Convertir Date a LocalDate
-    LocalDate birthDate = fechaNacimiento.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    LocalDate today = LocalDate.now();
-    // Calcular la diferencia en años
-    return Period.between(birthDate, today).getYears();
+    /**
+     * Calcula la edad del titular en años basándose en la fecha de nacimiento.
+     *
+     * @return the age in years
+     * @throws IllegalArgumentException si el campo fechaNacimiento es nulo
+     */
+    public int getEdad() {
+        if (fechaNacimiento == null) {
+            throw new IllegalArgumentException("La fecha de nacimiento no puede ser nula.");
+        }
+        // Convertir Date a LocalDate
+        LocalDate birthDate = fechaNacimiento.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate today = LocalDate.now();
+        // Calcular la diferencia en años
+        return Period.between(birthDate, today).getYears();
     }
 }
