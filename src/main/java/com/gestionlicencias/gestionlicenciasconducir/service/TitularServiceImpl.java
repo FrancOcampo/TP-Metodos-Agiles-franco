@@ -2,6 +2,7 @@ package com.gestionlicencias.gestionlicenciasconducir.service;
 
 import java.util.List;
 
+import com.gestionlicencias.gestionlicenciasconducir.mapper.TitularMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,12 @@ import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 public class TitularServiceImpl implements TitularService {
 
     private final TitularRepository repository;
+    private final TitularMapper titularMapper;
 
     @Autowired
-    public TitularServiceImpl(TitularRepository repository) {
+    public TitularServiceImpl(TitularRepository repository, TitularMapper titularMapper) {
         this.repository = repository;
+        this.titularMapper = titularMapper;
     }
 
     @Override
@@ -28,7 +31,8 @@ public class TitularServiceImpl implements TitularService {
             throw new IllegalArgumentException("Ya existe un titular con documento: " + titularRecord.getDocumento() + " y tipo de documento: " + titularRecord.getTipoDocumento());
         }
         // Convertir el DTO a entidad
-        Titular titular = titularRecord.toTitular();
+        Titular titular = titularMapper.toEntity(titularRecord);
+        //Titular titular = titularRecord.toTitular();
         // Guardar el titular en la base de datos
         return repository.save(titular);
     }
@@ -38,4 +42,24 @@ public class TitularServiceImpl implements TitularService {
         return repository.findAll();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public TitularRecord buscarTitular(TipoDocumento tipoDocumento, String documento) {
+        Titular titular = repository.findByTipoDocumentoAndDocumento(tipoDocumento, documento)
+                .orElseThrow(() -> new IllegalArgumentException("Titular no encontrado con documento: " + documento + " y tipo de documento: " + tipoDocumento));
+        return titularMapper.toRecord(titular);
+        /*
+            return new TitularRecord(
+              titular.getTipoDocumento(),
+              titular.getDocumento(),
+              titular.getNombre(),
+              titular.getApellido(),
+              titular.getFechaNacimiento(),
+              titular.getDireccion(),
+              titular.getGrupoSanguineo(),
+              titular.getFactorRH(),
+              titular.getDonanteOrganos()
+            );
+        */
+    }
 }

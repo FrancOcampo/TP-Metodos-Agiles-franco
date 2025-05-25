@@ -1,10 +1,7 @@
 package com.gestionlicencias.gestionlicenciasconducir.controller;
 
-import java.sql.Date;
-import java.time.LocalDate;
-
+import com.gestionlicencias.gestionlicenciasconducir.mapper.TitularMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,7 +10,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -36,10 +32,12 @@ import jakarta.validation.Valid;
 public class TitularController {
 
     private final TitularService service;
+    private final TitularMapper titularMapper;
 
     @Autowired
-    public TitularController(TitularService service) {
+    public TitularController(TitularService service, TitularMapper titularMapper) {
         this.service = service;
+        this.titularMapper = titularMapper;
     }
 
     /* 
@@ -62,6 +60,30 @@ public class TitularController {
     @GetMapping
     public String mostrarMenu() {  return "menuTitular";    }
 
+    @Operation(
+            summary = "Buscar un Titular",
+            description = "Busca un titular por dtipo y numero de documento",
+            responses = {
+                    @ApiResponse(responseCode = "202", description = "Titular no encontrado"),
+                    @ApiResponse(responseCode = "404", description = "Titular no encontrado"),
+                    @ApiResponse(responseCode = "400", description = "Parámetros Inválidos")
+            }
+    )
+    @GetMapping("/buscar/titular")
+    public ResponseEntity<TitularRecord> buscarTitular(
+            @RequestParam TipoDocumento tipoDocumento,
+            @RequestParam String documento
+    ){
+        try{
+            TitularRecord titularRecord = service.buscarTitular(tipoDocumento, documento);
+            return ResponseEntity.ok(titularRecord);
+        } catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró un titular con ese tipo y numero de documento");
+            //Alternativa
+            //return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping("/registroTitular")
     public String mostrarFormulario(Model model) {
         if (!model.containsAttribute("titularDTO")) {
@@ -79,33 +101,44 @@ public class TitularController {
     ) {
         if (bindingResult.hasErrors()) {
             // Si hay errores de validación, se vuelve al formulario con los datos cargados
+            // sugerencia: model.addAttribute("bindingResult", bindingResult);
             return "registroTitular";
         }
 
         try {
             java.sql.Date fechaNacimientoSql = new java.sql.Date(titularDTO.getFechaNacimiento().getTime());
 
-            TitularRecord dto = new TitularRecord(
-                titularDTO.getTipoDocumento(),
-                titularDTO.getDocumento(),
-                titularDTO.getNombre(),
-                titularDTO.getApellido(), 
-                fechaNacimientoSql,
-                titularDTO.getDireccion(),
-                titularDTO.getGrupoSanguineo(),
-                titularDTO.getFactorRH(),
-                titularDTO.getDonanteOrganos()
-            );
+            TitularRecord dto = titularMapper.toRecord(titularDTO);
+            /*
+                TitularRecord dto = new TitularRecord(
+                    titularDTO.getTipoDocumento(),
+                    titularDTO.getDocumento(),
+                    titularDTO.getNombre(),
+                    titularDTO.getApellido(),
+                    fechaNacimientoSql,
+                    titularDTO.getDireccion(),
+                    titularDTO.getGrupoSanguineo(),
+                    titularDTO.getFactorRH(),
+                    titularDTO.getDonanteOrganos()
+                );
+            */
 
             service.registrarTitular(dto);
             redirectAttributes.addFlashAttribute("successMessage", "Titular registrado exitosamente.");
-            return "redirect:/api/titulares/registroTitular";
+
+            // Path construido dinamicamente, aumenta flexibilidad ante cambios del endpoint o entornos donde no se usa '/'
+            String redirectPath = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/titulares/registroTitular")
+                    .toUriString();
+
+            return "redirect:" + redirectPath;
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "registroTitular";
             
         } catch (Exception e) {
+            //sugerencia: logger.error("Error mientras se registraba un titular", e);
             model.addAttribute("errorMessage", "Ocurrió un error al registrar el titular.");
             return "registroTitular";
         }

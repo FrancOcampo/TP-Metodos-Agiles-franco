@@ -41,6 +41,7 @@ public record TitularRecord(
     @NotNull(message = "El donante de organos no puede ser nulo")
     Boolean donanteOrganos
 ) {
+    //Conviene sacar este metodo ya que se pasa la responsabilidad al mapper
     public Titular toTitular() {
         Titular titular = new Titular();
         titular.setTipoDocumento(this.tipoDocumento);
