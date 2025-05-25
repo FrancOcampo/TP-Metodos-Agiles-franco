@@ -40,7 +40,6 @@ public class TitularController {
         this.titularMapper = titularMapper;
     }
 
-    /* 
     @Operation(summary = "Registrar un titular", 
                 description = "Registra un nuevo titular en la base de datos", 
                 responses = {
@@ -53,7 +52,9 @@ public class TitularController {
     public ResponseEntity<Void> registrarTitular(@RequestBody @Valid TitularRecord titularRecord) {
         service.registrarTitular(titularRecord);
         return new ResponseEntity<>(HttpStatus.CREATED);
-    } */
+    }
+
+    //Falta hacer un get de Titular por tipo de documento y numero de documento
     
     //Endpoints para el front
 
@@ -91,7 +92,20 @@ public class TitularController {
         }
         return "registroTitular";
     }
-    
+
+    @GetMapping("/modificar")
+    public String mostrarFormularioModificar() {   return "modificarTitular";    }
+
+    //eliminar
+    @GetMapping("/eliminar")
+    public String mostrarFormularioEliminar() {   return "eliminarTitular";    }
+
+    //listar
+    @GetMapping("/listar")
+    public String mostrarFormularioListar() {   return "listarTitular";    }
+
+    //No se cualquier cosa esto
+    /*
     @PostMapping("/registrar")
     public String registrarTitular(
         @Valid @ModelAttribute("titularDTO") TitularDTO titularDTO,
@@ -143,16 +157,5 @@ public class TitularController {
             return "registroTitular";
         }
     }
-
-    @GetMapping("/modificar")
-    public String mostrarFormularioModificar() {   return "modificarTitular";    }
-
-    //eliminar
-    @GetMapping("/eliminar")
-    public String mostrarFormularioEliminar() {   return "eliminarTitular";    }
-
-    //listar
-    @GetMapping("/listar")
-    public String mostrarFormularioListar() {   return "listarTitular";    }
-
+    */
 }
