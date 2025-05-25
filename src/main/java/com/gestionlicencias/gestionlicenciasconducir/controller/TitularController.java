@@ -7,11 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularDTO;
@@ -22,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /*Estas son anotaciones para la documentación de la API
  * Ingresar a http://localhost:8080/swagger-ui/index.html para ver la documentación de la API
@@ -79,7 +76,7 @@ public class TitularController {
             TitularRecord titularRecord = service.buscarTitular(tipoDocumento, documento);
             return ResponseEntity.ok(titularRecord);
         } catch (IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró un titular con ese tipo y numero de documento");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             //Alternativa
             //return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -105,7 +102,6 @@ public class TitularController {
     public String mostrarFormularioListar() {   return "listarTitular";    }
 
     //No se cualquier cosa esto
-    /*
     @PostMapping("/registrar")
     public String registrarTitular(
         @Valid @ModelAttribute("titularDTO") TitularDTO titularDTO,
@@ -120,7 +116,7 @@ public class TitularController {
         }
 
         try {
-            java.sql.Date fechaNacimientoSql = new java.sql.Date(titularDTO.getFechaNacimiento().getTime());
+            //java.sql.Date fechaNacimientoSql = new java.sql.Date(titularDTO.getFechaNacimiento().getTime());
 
             TitularRecord dto = titularMapper.toRecord(titularDTO);
             /*
@@ -157,5 +153,5 @@ public class TitularController {
             return "registroTitular";
         }
     }
-    */
+
 }
