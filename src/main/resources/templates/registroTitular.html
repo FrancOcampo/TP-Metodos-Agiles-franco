@@ -38,11 +38,12 @@
       margin: 0 auto;
     }
     h2 {
-      text-align: center;
+      text-align: left;
       color: #16c79a;
       margin-bottom: 28px;
       font-weight: 700;
       letter-spacing: 0.5px;
+      padding-left: 0;
     }
     .form-group {
       display: flex;
@@ -50,6 +51,9 @@
       margin-bottom: 18px;
     }
     .form-group label[for]::after {
+      content: '';
+    }
+    .form-group label[for].invalid::after {
       content: '*';
       color: red;
       margin-left: 4px;
@@ -155,9 +159,9 @@
           th:action="@{/api/titulares/registrar}"
           th:object="${titularDTO}"
           method="post"
-          onsubmit="return validarFormulario()"
+          onsubmit="return enviarFormulario(event)"
           novalidate>
-      <h2>Alta de Titular</h2>
+      <h2>Registrar un titular</h2>
 
       <div th:if="${successMessage}" class="alert alert-success">
         <span th:text="${successMessage}"></span>
@@ -249,6 +253,52 @@
     </form>
   </div>
   <script>
+    async function enviarFormulario(event) {
+      event.preventDefault();
+      
+      if (!validarFormulario()) {
+        return false;
+      }
+
+      const formData = {
+        tipoDocumento: document.getElementById('tipoDocumento').value,
+        documento: document.getElementById('documento').value,
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        fechaNacimiento: document.getElementById('fechaNacimiento').value,
+        direccion: document.getElementById('direccion').value,
+        grupoSanguineo: document.getElementById('grupoSanguineo').value,
+        factorRH: document.getElementById('factorRH').value,
+        donanteOrganos: document.getElementById('donanteOrganos').checked
+      };
+
+      try {
+        const response = await fetch('/api/titulares/registrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          alert('Titular registrado exitosamente');
+          window.location.href = '/api/titulares/registroTitular';
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al registrar el titular');
+        }
+      } catch (error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-error';
+        errorDiv.innerHTML = `
+          <span>${error.message}</span>
+          <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+        `;
+        document.querySelector('.form-card').insertBefore(errorDiv, document.querySelector('h2'));
+      }
+    }
+
     function validarFormulario() {
       const form = document.getElementById('altaTitularForm');
       const campos = form.querySelectorAll('input[required], select[required]');
@@ -256,14 +306,18 @@
       let tieneCamposVacios = false;
 
       campos.forEach(campo => {
+        const label = campo.parentElement.querySelector('label');
         const errorMsg = campo.parentElement.querySelector('.error-message');
         const vacio = campo.tagName === 'SELECT' ? campo.value === '' : campo.value.trim() === '';
+        
         campo.classList.remove('input-error');
         if (errorMsg) errorMsg.style.display = 'none';
+        if (label) label.classList.remove('invalid');
 
         if (vacio) {
           campo.classList.add('input-error');
           if (errorMsg) errorMsg.style.display = 'block';
+          if (label) label.classList.add('invalid');
           tieneCamposVacios = true;
           valido = false;
           return;
@@ -278,10 +332,12 @@
           if (tipo === 'DNI' && !/^\d{8}$/.test(valor)) {
             alert('El DNI debe tener exactamente 8 dígitos numéricos.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           } else if (tipo !== 'DNI' && !/^[a-zA-Z0-9]{8}$/.test(valor)) {
             alert('El número de documento debe tener 8 caracteres alfanuméricos.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           }
         }
@@ -290,10 +346,12 @@
           if (valor.length > 50) {
             alert('El nombre no puede superar los 50 caracteres.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
             alert('El nombre sólo puede contener letras y espacios.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           }
         }
@@ -302,10 +360,12 @@
           if (valor.length > 50) {
             alert('El apellido no puede superar los 50 caracteres.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           } else if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
             alert('El apellido sólo puede contener letras y espacios.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           }
         }
@@ -313,6 +373,7 @@
         if (id === 'direccion' && valor.length > 100) {
           alert('La dirección no puede superar los 100 caracteres.');
           campo.classList.add('input-error');
+          if (label) label.classList.add('invalid');
           valido = false;
         }
 
@@ -328,6 +389,7 @@
           if (!tiene17) {
             alert('El titular debe tener al menos 17 años.');
             campo.classList.add('input-error');
+            if (label) label.classList.add('invalid');
             valido = false;
           }
         }
