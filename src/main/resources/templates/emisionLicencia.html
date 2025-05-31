@@ -145,9 +145,7 @@
           <option value="A">A</option>
           <option value="B">B</option>
           <option value="C">C</option>
-          <option value="D">D</option>
           <option value="E">E</option>
-          <option value="F">F</option>
           <option value="G">G</option>
         </select>
         <div class="error-message">Este campo es obligatorio.</div>
@@ -255,6 +253,11 @@
 
       if (response.status === 201) {
         alert("Licencia registrada con éxito.");
+        const url = new URL("/api/licencias/comprobante", window.location.origin);
+        url.searchParams.append("tipoDocumento", tipo);
+        url.searchParams.append("documento", numero);
+        console.log("URL generada:", url.toString());
+        window.open(url.toString(), '_blank');
         location.reload();
       } else {
         const data = await response.json();

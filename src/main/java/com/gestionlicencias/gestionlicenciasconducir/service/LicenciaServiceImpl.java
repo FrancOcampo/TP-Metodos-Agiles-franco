@@ -168,6 +168,7 @@ public class LicenciaServiceImpl implements LicenciaService {
         tramite.setFecha(java.sql.Date.valueOf(java.time.LocalDate.now()));
         tramite.setDescripcion("Emisión de licencia de conducir clase " + claseLicencia);
         tramite.setCosto(calcularCostoLicencia(claseLicencia, aniosVigencia));
+        tramite.setTitularAsociado(titular);
         tramite.setUsuarioResponsable(usuarioService.buscarUsuarioPorId(1)); // POR AHORA HASTA QUE HAGAMOS EL OTRO SPRINT
         tramite.setLicenciaAsociada(nuevaLicencia);
         tramiteService.registrarTramite(tramite);
@@ -212,5 +213,9 @@ public class LicenciaServiceImpl implements LicenciaService {
     public Licencia buscarLicenciaPorId(Integer id) {
         return repository.findByIdLicencia(id)
                 .orElseThrow(() -> new RuntimeException("Licencia no encontrada."));
+    }
+
+    public Licencia obtenerUltimaLicenciaTitular(Titular titular) {
+        return repository.findFirstByTitularOrderByFechaInicioDesc(titular);
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Comprobante Licencia</title>
@@ -10,18 +10,34 @@
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Montserrat', 'Segoe UI', sans-serif;
       font-size: 14px;
       background-color: white;
       color: #000;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
+    }
+
+    .header-sfc {
+      width: 100vw;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(22,199,154,0.08);
+      padding: 18px 0 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 40px;
+    }
+    .header-sfc img {
+      height: 80px;
+      width: auto;
     }
 
     .comprobante {
       max-width: 18cm;
       margin: auto;
-      padding-top: 40px; 
+      padding-top: 0; 
     }
 
     .header {
@@ -81,18 +97,23 @@
     }
 
     .print-button button {
-      font-size: 15px;
+      display: block;
+      background-color: #16c79a;
+      color: #fff;
       padding: 12px 24px;
-      background-color: #0b84ff;
-      color: white;
+      font-size: 15px;
       border: none;
-      border-radius: 6px;
+      border-radius: 30px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      margin: 0 auto;
+      margin-top: 20px;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 1px 4px rgba(22,199,154,0.08);
     }
 
     .print-button button:hover {
-      background-color: #0964c9;
+      background-color: #13b088;
+      color: #fff;
     }
 
     @media print {
@@ -113,48 +134,53 @@
 </head>
 <body>
 
-<div class="comprobante">
-
-  <div class="header">
-    <h1>COMPROBANTE DE TRÁMITE: LICENCIA DE CONDUCIR</h1>
-    <p>Dirección General de Tránsito y Transporte</p>
-    <p>Municipalidad de Santa Fe</p>
+  <div class="header-sfc">
+    <img src="/logo-sfc.png" alt="Santa Fe Capital Logo">
   </div>
 
-  <div class="section">
-    <div class="section-title">Datos del titular</div>
-    <div class="line"><span class="label">Nombre/s y apellido/s:</span> <span th:text="${nombre} + ' ' + ${apellido}"></span></div>
-    <div class="line"><span class="label">Tipo de documento:</span> <span th:text="${tipoDocumento}"></span></div>
-    <div class="line"><span class="label">Número de documento:</span> <span th:text="${numeroDocumento}"></span></div>
-  </div>
+  <div class="comprobante">
 
-  <div class="section">
-    <div class="section-title">Datos de la licencia</div>
-    <div class="line"><span class="label">Clase de licencia:</span> <span th:text="${claseLicencia}"></span></div>
-    <div class="line"><span class="label">Fecha de emisión:</span> <span th:text="${fechaActual}"></span></div>
-    <div class="line"><span class="label">Fecha de vencimiento:</span> <span th:text="${fechaVencimiento}"></span></div>
-    <div class="line"><span class="label">Observaciones:</span>
-      <span th:text="${limitaciones != null && !#strings.isEmpty(limitaciones) ? limitaciones : 'Sin observaciones'}"></span>
+    <div class="header">
+      <img src="/logo-sfc.png" alt="Santa Fe Capital Logo" style="height: 40px; width: auto; filter: grayscale(100%);">
+      <h1>COMPROBANTE DE TRÁMITE: LICENCIA DE CONDUCIR</h1>
+      <p>Dirección General de Tránsito y Transporte</p>
+      <p>Municipalidad de Santa Fe</p>
     </div>
+
+    <div class="section">
+      <div class="section-title">Datos del titular</div>
+      <div class="line"><span class="label">Nombre/s y apellido/s:</span> <span th:text="${titular.nombre} + ' ' + ${titular.apellido}"></span></div>
+      <div class="line"><span class="label">Tipo de documento:</span> <span th:text="${titular.tipoDocumento}"></span></div>
+      <div class="line"><span class="label">Número de documento:</span> <span th:text="${titular.documento}"></span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Datos de la licencia</div>
+      <div class="line"><span class="label">Clase de licencia:</span> <span th:text="${licencia.clase}"></span></div>
+      <div class="line"><span class="label">Fecha de emisión:</span> <span th:text="${licencia.fechaInicio}"></span></div>
+      <div class="line"><span class="label">Fecha de vencimiento:</span> <span th:text="${licencia.fechaVencimiento}"></span></div>
+      <div class="line"><span class="label">Observaciones:</span>
+        <span th:text="${licencia.observaciones != null && !#strings.isEmpty(licencia.observaciones) ? licencia.observaciones : 'Sin observaciones'}"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Datos del trámite</div>
+      <div class="line"><span class="label">Tipo de trámite:</span> <span th:text="${tramite.descripcion}"></span></div>
+      <div class="line"><span class="label">Costo del trámite:</span> <span th:text="${tramite.costo}"></span></div>
+    </div>
+
+    <div class="firma">
+      <p style="margin-bottom: 80px;">Emitido en fecha: <span th:text="${licencia.fechaInicio}"></span></p>
+      <div class="linea"></div>
+      <p>Firma y sello autorizado</p>
+    </div>
+
   </div>
 
-  <div class="section">
-    <div class="section-title">Datos del trámite</div>
-    <div class="line"><span class="label">Tipo de trámite:</span> </div>  <!-- Emisión, copia, etc. -->
-    <div class="line"><span class="label">Costo del trámite:</span> <span th:text="${costo}"></span></div>
+  <div class="print-button">
+    <button onclick="window.print()">Imprimir comprobante</button>
   </div>
-
-  <div class="firma">
-    <p>Emitido en fecha: <span th:text="${fechaActual}"></span></p>
-    <div class="linea"></div>
-    <p>Firma y sello autorizado</p>
-  </div>
-
-</div>
-
-<div class="print-button">
-  <button onclick="window.print()">Imprimir comprobante</button>
-</div>
 
 </body>
 </html>

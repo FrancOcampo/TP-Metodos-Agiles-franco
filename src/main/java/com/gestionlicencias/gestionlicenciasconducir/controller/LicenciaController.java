@@ -2,22 +2,26 @@ package com.gestionlicencias.gestionlicenciasconducir.controller;
 
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
+import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
+import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
+import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
+import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
 import com.gestionlicencias.gestionlicenciasconducir.service.LicenciaServiceImpl;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularServiceImpl;
+import com.gestionlicencias.gestionlicenciasconducir.service.TramiteServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Licencia Controller", description = "Operaciones para la emisión de licencias")
@@ -26,12 +30,14 @@ import org.springframework.web.bind.annotation.*;
 public class LicenciaController {
 
     private final LicenciaServiceImpl licenciaService;
-    private final TitularServiceImpl titularService;;
+    private final TitularServiceImpl titularService;
+    private final TramiteServiceImpl tramiteService;
 
     @Autowired
-    public LicenciaController(LicenciaServiceImpl licenciaService, TitularServiceImpl titularService) {
+    public LicenciaController(LicenciaServiceImpl licenciaService, TitularServiceImpl titularService, TramiteServiceImpl tramiteService) {
         this.licenciaService = licenciaService;
         this.titularService = titularService;
+        this.tramiteService = tramiteService;
     }
 
     @GetMapping("/registroLicencia")
@@ -80,6 +86,24 @@ public class LicenciaController {
         }
     }
 
+    @GetMapping("/comprobante")
+    public String mostrarComprobante(
+        @RequestParam("tipoDocumento") TipoDocumento tipoDocumento,
+        @RequestParam("documento") String documento,
+        Model model) {
+
+        // Buscar titular
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+
+        Licencia licencia = licenciaService.obtenerUltimaLicenciaTitular(titular);
+        Tramite tramite = tramiteService.obtenerUltimoTramiteTitular(titular);
+
+        model.addAttribute("titular", titular);
+        model.addAttribute("licencia", licencia);
+        model.addAttribute("tramite", tramite);
+
+        return "comprobanteTramite";
+    }
     
 
 }

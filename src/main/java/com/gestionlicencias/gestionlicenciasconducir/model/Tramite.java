@@ -23,6 +23,10 @@ public class Tramite {
     private Float costo;
 
     @ManyToOne
+    @JoinColumn(name = "id_titular_asociado", nullable = false)
+    private Titular titularAsociado;
+
+    @ManyToOne
     @JoinColumn(name = "id_usuario_responsable", nullable = false)
     private Usuario usuarioResponsable;
 
@@ -42,6 +46,8 @@ public class Tramite {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public Float getCosto() { return costo; }
     public void setCosto(Float costo) { this.costo = costo; }
+    public Titular getTitularAsociado() { return titularAsociado; }
+    public void setTitularAsociado(Titular titularAsociado) { this.titularAsociado = titularAsociado; }
     public Usuario getUsuarioResponsable() { return usuarioResponsable; }
     public void setUsuarioResponsable(Usuario usuarioResponsable) { this.usuarioResponsable = usuarioResponsable; }
     public Licencia getLicenciaAsociada() { return licenciaAsociada; }

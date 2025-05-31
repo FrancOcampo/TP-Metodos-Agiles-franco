@@ -1,7 +1,7 @@
 package com.gestionlicencias.gestionlicenciasconducir.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
 import com.gestionlicencias.gestionlicenciasconducir.repository.TramiteRepository;
 
@@ -18,6 +18,11 @@ public class TramiteServiceImpl implements TramiteService {
     @Override
     public Tramite registrarTramite(Tramite tramite) {
         return repository.save(tramite);
+    }
+
+    @Override
+    public Tramite obtenerUltimoTramiteTitular(Titular titular) {
+        return repository.findFirstByTitularAsociadoOrderByFechaDesc(titular);
     }
 
 }

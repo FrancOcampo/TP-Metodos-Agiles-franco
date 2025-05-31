@@ -10,5 +10,5 @@ public interface TitularService {
     Titular registrarTitular(TitularRecord titularRecord);
     List<Titular> listarTitulares();
     TitularRecord buscarTitular(TipoDocumento tipoDocumento, String documento);
-    // …otros métodos: buscarPorId, eliminar, etc.
+    Titular buscarTitularDocumento(TipoDocumento tipoDocumento, String documento);
 }
