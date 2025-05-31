@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
-import com.gestionlicencias.gestionlicenciasconducir.dto.TitularDTO;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -76,12 +74,7 @@ public class TitularController {
     public String mostrarMenu() {  return "menuTitular";    }
 
     @GetMapping("/registroTitular")
-    public String mostrarFormulario(Model model) {
-        if (!model.containsAttribute("titularDTO")) {
-            model.addAttribute("titularDTO", new TitularDTO());
-        }
-        return "registroTitular";
-    }
+    public String mostrarFormulario() {    return "registroTitular";    }
 
     @GetMapping("/modificar")
     public String mostrarFormularioModificar() {   return "modificarTitular";    }

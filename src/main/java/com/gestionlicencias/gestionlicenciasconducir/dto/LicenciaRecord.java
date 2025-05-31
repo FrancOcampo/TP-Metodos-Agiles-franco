@@ -1,9 +1,6 @@
 package com.gestionlicencias.gestionlicenciasconducir.dto;
 
-import java.util.Date;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Future;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import org.hibernate.validator.constraints.Length; 
 

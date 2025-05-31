@@ -2,9 +2,7 @@ package com.gestionlicencias.gestionlicenciasconducir.controller;
 
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
-import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
-import com.gestionlicencias.gestionlicenciasconducir.service.LicenciaService;
 import com.gestionlicencias.gestionlicenciasconducir.service.LicenciaServiceImpl;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularServiceImpl;
 
@@ -73,7 +71,7 @@ public class LicenciaController {
 
         } catch (ClaseEmisionInvalidaException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Clase inválida: " + e.getMessage()));
+                .body(Map.of("error", "Error: " + e.getMessage()));
                 
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,5 +79,7 @@ public class LicenciaController {
                 .body(Map.of("error", "Error inesperado: " + e.getMessage()));
         }
     }
+
+    
 
 }

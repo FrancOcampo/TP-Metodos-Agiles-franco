@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
+import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
 import com.gestionlicencias.gestionlicenciasconducir.repository.LicenciaRepository;
 
 @Service
@@ -18,10 +20,14 @@ public class LicenciaServiceImpl implements LicenciaService {
     private static final List<Integer> VIGENCIAS_VALIDAS = Arrays.asList(1, 3, 4, 5);
 
     private final LicenciaRepository repository;
+    private final TramiteService tramiteService;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public LicenciaServiceImpl(LicenciaRepository repository) {
+    public LicenciaServiceImpl(LicenciaRepository repository, TramiteService tramiteService, UsuarioService usuarioService) {
         this.repository = repository;
+        this.tramiteService = tramiteService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -84,15 +90,31 @@ public class LicenciaServiceImpl implements LicenciaService {
 
     public Licencia emitirLicencia(Titular titular, String claseLicencia, String observaciones) throws ClaseEmisionInvalidaException {
 
-        if(claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E")) {
+        // Obtener las licencias del titular
+        List<Licencia> licenciasTitular = titular.getLicencias();
+
+        // Buscar si el titular tiene una licencia vigente del tipo solicitado 
+        Optional<Licencia> licenciaTipo = licenciasTitular.stream()
+            .filter(licencia -> licencia.getClase().equalsIgnoreCase(claseLicencia))
+            .findFirst();
+
+        if (licenciaTipo.isPresent()) {
+            Licencia L = licenciaTipo.get();
+            if (!L.getEstaVigente()) {
+                throw new ClaseEmisionInvalidaException("El titular ya posee una licencia de tipo " + claseLicencia + " que no está vigente. Debe renovarla.");
+            } else if (L.getFechaVencimiento().before(java.sql.Date.valueOf(java.time.LocalDate.now()))) {
+                L.setEstaVigente(false);
+                repository.save(L);
+                throw new ClaseEmisionInvalidaException("El titular ya posee una licencia de tipo " + claseLicencia + " que está vencida. Debe renovarla.");
+            } else throw new ClaseEmisionInvalidaException("El titular ya posee una licencia vigente de tipo " + claseLicencia + ".");
+        }
+
+        else if(claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E")) {
 
         // Validar que el titular tenga más de 21 años
         if (titular.getEdad() < 21 && (claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E"))) {
             throw new ClaseEmisionInvalidaException("El titular debe tener al menos 21 años para obtener una licencia de tipo C, D o E.");
         }
-
-        // Obtener las licencias del titular
-        List<Licencia> licenciasTitular = titular.getLicencias();
 
         // Buscar si el titular tiene una licencia de tipo B
         boolean tieneLicenciaTipoB = licenciasTitular.stream()
@@ -141,9 +163,17 @@ public class LicenciaServiceImpl implements LicenciaService {
 
         repository.save(nuevaLicencia);
 
+        //Registro del trámite
+        Tramite tramite = new Tramite();
+        tramite.setFecha(java.sql.Date.valueOf(java.time.LocalDate.now()));
+        tramite.setDescripcion("Emisión de licencia de conducir clase " + claseLicencia);
+        tramite.setCosto(calcularCostoLicencia(claseLicencia, aniosVigencia));
+        tramite.setUsuarioResponsable(usuarioService.buscarUsuarioPorId(1)); // POR AHORA HASTA QUE HAGAMOS EL OTRO SPRINT
+        tramite.setLicenciaAsociada(nuevaLicencia);
+        tramiteService.registrarTramite(tramite);
+
         return nuevaLicencia;
 
-        //FALTA REGISTRAR EL TRÁMITE
     }
 
     public int calcularVigenciaLicencia(Titular titular, String claseLicencia) {

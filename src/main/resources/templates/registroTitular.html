@@ -156,101 +156,100 @@
   </div>
   <div class="form-card">
     <form id="altaTitularForm"
-          th:action="@{/api/titulares/registrar}"
-          th:object="${titularDTO}"
-          method="post"
-          onsubmit="return enviarFormulario(event)"
-          novalidate>
-      <h2>Registrar un titular</h2>
+      th:action="@{/api/titulares/registrar}"
+      method="post"
+      onsubmit="return enviarFormulario(event)"
+      novalidate>
+  <h2>Registrar un titular</h2>
 
-      <div th:if="${successMessage}" class="alert alert-success">
-        <span th:text="${successMessage}"></span>
-        <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-      </div>
+  <div th:if="${successMessage}" class="alert alert-success">
+    <span th:text="${successMessage}"></span>
+    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+  </div>
 
-      <div th:if="${errorMessage}" class="alert alert-error">
-        <span th:text="${errorMessage}"></span>
-        <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
-      </div>
+  <div th:if="${errorMessage}" class="alert alert-error">
+    <span th:text="${errorMessage}"></span>
+    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+  </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label for="tipoDocumento" class="invalid">Tipo de documento</label>
-          <select th:field="*{tipoDocumento}" id="tipoDocumento" required>
-            <option value="">Seleccione...</option>
-            <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
-              <option th:value="${tipo}" th:text="${tipo}"></option>
-            </th:block>
-          </select>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
+  <div class="row">
+    <div class="form-group">
+      <label for="tipoDocumento" class="invalid">Tipo de documento</label>
+      <select id="tipoDocumento" name="tipoDocumento" required>
+        <option value="">Seleccione...</option>
+        <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
+          <option th:value="${tipo}" th:text="${tipo}"></option>
+        </th:block>
+      </select>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
 
-        <div class="form-group">
-          <label for="documento" class="invalid">Número de documento</label>
-          <input type="text" th:field="*{documento}" id="documento" maxlength="8" required>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="documento" class="invalid">Número de documento</label>
+      <input type="text" id="documento" name="documento" maxlength="8" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+  </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label for="apellido" class="invalid">Apellido/s</label>
-          <input type="text" th:field="*{apellido}" id="apellido" maxlength="50" required>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
+  <div class="row">
+    <div class="form-group">
+      <label for="apellido" class="invalid">Apellido/s</label>
+      <input type="text" id="apellido" name="apellido" maxlength="50" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
 
-        <div class="form-group">
-          <label for="nombre" class="invalid">Nombre/s</label>
-          <input type="text" th:field="*{nombre}" id="nombre" maxlength="50" required>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="nombre" class="invalid">Nombre/s</label>
+      <input type="text" id="nombre" name="nombre" maxlength="50" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+  </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label for="fechaNacimiento" class="invalid">Fecha de nacimiento</label>
-          <input type="date" th:field="*{fechaNacimiento}" id="fechaNacimiento" required>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
+  <div class="row">
+    <div class="form-group">
+      <label for="fechaNacimiento" class="invalid">Fecha de nacimiento</label>
+      <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
 
-        <div class="form-group">
-          <label for="direccion" class="invalid">Dirección</label>
-          <input type="text" th:field="*{direccion}" id="direccion" maxlength="100" required>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="direccion" class="invalid">Dirección</label>
+      <input type="text" id="direccion" name="direccion" maxlength="100" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+  </div>
 
-      <div class="row">
-        <div class="form-group">
-          <label for="grupoSanguineo" class="invalid">Grupo sanguíneo</label>
-          <select th:field="*{grupoSanguineo}" id="grupoSanguineo" required>
-            <option value="">Seleccione...</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-          </select>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
+  <div class="row">
+    <div class="form-group">
+      <label for="grupoSanguineo" class="invalid">Grupo sanguíneo</label>
+      <select id="grupoSanguineo" name="grupoSanguineo" required>
+        <option value="">Seleccione...</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="AB">AB</option>
+        <option value="O">O</option>
+      </select>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
 
-        <div class="form-group">
-          <label for="factorRH" class="invalid">Factor RH</label>
-          <select th:field="*{factorRH}" id="factorRH" required>
-            <option value="">Seleccione...</option>
-            <option value="+">Positivo (+)</option>
-            <option value="-">Negativo (-)</option>
-          </select>
-          <div class="error-message">Este campo es obligatorio.</div>
-        </div>
-      </div>
+    <div class="form-group">
+      <label for="factorRH" class="invalid">Factor RH</label>
+      <select id="factorRH" name="factorRH" required>
+        <option value="">Seleccione...</option>
+        <option value="+">Positivo (+)</option>
+        <option value="-">Negativo (-)</option>
+      </select>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+  </div>
 
-      <div class="checkbox-container">
-        <label for="donanteOrganos">Donante de órganos</label>
-        <input type="checkbox" id="donanteOrganos" th:field="*{donanteOrganos}" />
-      </div>
+  <div class="checkbox-container">
+    <label for="donanteOrganos">Donante de órganos</label>
+    <input type="checkbox" id="donanteOrganos" name="donanteOrganos" />
+  </div>
 
-      <button class="btn" type="submit">Registrar titular</button>
-    </form>
+  <button class="btn" type="submit">Registrar titular</button>
+</form>
   </div>
   <script>
     async function enviarFormulario(event) {

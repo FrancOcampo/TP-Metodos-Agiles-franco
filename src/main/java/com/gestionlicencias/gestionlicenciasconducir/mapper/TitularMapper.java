@@ -1,11 +1,8 @@
 package com.gestionlicencias.gestionlicenciasconducir.mapper;
 
-import com.gestionlicencias.gestionlicenciasconducir.dto.TitularDTO;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import org.springframework.stereotype.Component;
-
-import java.sql.Date;
 
 @Component
 public class TitularMapper {
@@ -20,19 +17,6 @@ public class TitularMapper {
                 titular.getGrupoSanguineo(),
                 titular.getFactorRH(),
                 titular.getDonanteOrganos()
-        );
-    }
-    public TitularRecord toRecord(TitularDTO titularDTO) {
-        return new TitularRecord(
-                titularDTO.getTipoDocumento(),
-                titularDTO.getDocumento(),
-                titularDTO.getNombre(),
-                titularDTO.getApellido(),
-                new Date(titularDTO.getFechaNacimiento().getTime()),
-                titularDTO.getDireccion(),
-                titularDTO.getGrupoSanguineo(),
-                titularDTO.getFactorRH(),
-                titularDTO.getDonanteOrganos()
         );
     }
 

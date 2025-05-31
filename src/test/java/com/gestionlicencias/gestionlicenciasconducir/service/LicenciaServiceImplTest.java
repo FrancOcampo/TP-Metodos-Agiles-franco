@@ -13,10 +13,12 @@ class LicenciaServiceImplTest {
 
     private LicenciaService licenciaService;
     private LicenciaRepository licenciaRepository;
+    private TramiteService tramiteService;
+    private UsuarioService usuarioService;
 
     @BeforeEach
     void setUp() {
-        licenciaService = new LicenciaServiceImpl(licenciaRepository);
+        licenciaService = new LicenciaServiceImpl(licenciaRepository, tramiteService, usuarioService);
     }
 
     @ParameterizedTest

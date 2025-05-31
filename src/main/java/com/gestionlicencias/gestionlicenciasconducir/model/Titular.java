@@ -1,6 +1,5 @@
 package com.gestionlicencias.gestionlicenciasconducir.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
