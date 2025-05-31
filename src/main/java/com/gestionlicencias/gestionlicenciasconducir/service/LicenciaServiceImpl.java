@@ -2,20 +2,27 @@ package com.gestionlicencias.gestionlicenciasconducir.service;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
+import com.gestionlicencias.gestionlicenciasconducir.repository.LicenciaRepository;
 
 @Service
 public class LicenciaServiceImpl implements LicenciaService {
 
     private static final List<String> CLASES_VALIDAS = Arrays.asList("A", "B", "C", "E", "G");
     private static final List<Integer> VIGENCIAS_VALIDAS = Arrays.asList(1, 3, 4, 5);
+
+    private final LicenciaRepository repository;
+
+    @Autowired
+    public LicenciaServiceImpl(LicenciaRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public Float calcularCostoLicencia(String clase, Integer vigencia) {
@@ -75,8 +82,14 @@ public class LicenciaServiceImpl implements LicenciaService {
         return costo;
     }
 
-    /*
     public Licencia emitirLicencia(Titular titular, String claseLicencia, String observaciones) throws ClaseEmisionInvalidaException {
+
+        if(claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E")) {
+
+        // Validar que el titular tenga más de 21 años
+        if (titular.getEdad() < 21 && (claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E"))) {
+            throw new ClaseEmisionInvalidaException("El titular debe tener al menos 21 años para obtener una licencia de tipo C, D o E.");
+        }
 
         // Obtener las licencias del titular
         List<Licencia> licenciasTitular = titular.getLicencias();
@@ -87,45 +100,55 @@ public class LicenciaServiceImpl implements LicenciaService {
                     licencia.getFechaInicio().before(java.sql.Date.valueOf(java.time.LocalDate.now().minusYears(1))));
 
         // Validar que tenga una licencia tipo B con más de un año de antigüedad
-        if ((claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E")) && !tieneLicenciaTipoB) {
+        if (!tieneLicenciaTipoB) {
             throw new ClaseEmisionInvalidaException("El titular debe haber tenido una licencia tipo B con al menos un año de antigüedad para obtener una licencia de tipo C, D o E.");
         }
 
         // Validar que el titular tenga menos de 65 años
-          if (titular.getEdad() >= 65 && (claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E"))) {
+        if (titular.getEdad() >= 65 && (claseLicencia.equalsIgnoreCase("C") || claseLicencia.equalsIgnoreCase("D") || claseLicencia.equalsIgnoreCase("E"))) {
             throw new ClaseEmisionInvalidaException("El titular debe tener menos de 65 años para obtener una licencia de tipo C, D o E.");
         }
-            // Emitir la licencia
-            Licencia nuevaLicencia = new Licencia();
-            nuevaLicencia.setTitular(titular);
-            nuevaLicencia.setClase(claseLicencia);
-            nuevaLicencia.setEstaVigente(true);
-            nuevaLicencia.setObservaciones(observaciones);
-            nuevaLicencia.setFechaInicio(java.sql.Date.valueOf(java.time.LocalDate.now()));
 
-            // Calcular años de vigencia
-            int aniosVigencia = calcularVigenciaLicencia(titular, claseLicencia);
+        } else if (titular.getEdad() < 17) {
+            throw new ClaseEmisionInvalidaException("El titular debe tener al menos 17 años para obtener una licencia de tipo A, B, F o G.");
+        }
+        
+        // Emitir la licencia
+        Licencia nuevaLicencia = new Licencia();
+        nuevaLicencia.setTitular(titular);
+        nuevaLicencia.setClase(claseLicencia);
+        nuevaLicencia.setEstaVigente(true);
+        nuevaLicencia.setObservaciones(observaciones);
+        nuevaLicencia.setFechaInicio(java.sql.Date.valueOf(java.time.LocalDate.now()));
 
-            // Año de vencimiento = año actual + años de vigencia
-            int anioVencimiento = nuevaLicencia.getFechaInicio().getYear() + aniosVigencia;
+        // Calcular años de vigencia según titular y clase de licencia
+        int aniosVigencia = calcularVigenciaLicencia(titular, claseLicencia);
 
-            // Fecha de vencimiento = cumpleaños del titular en el año de vencimiento
-            LocalDate fechaVencimiento = LocalDate.of(
+        int anioVencimiento = LocalDate.now().getYear() + aniosVigencia;
+
+        // Convertir fecha de nacimiento (Date) a LocalDate
+        LocalDate fechaNacimiento = ((java.sql.Date) titular.getFechaNacimiento()).toLocalDate();
+
+        // Crear la fecha de vencimiento con mismo mes y día que el nacimiento, pero en el año calculado
+        LocalDate fechaVencimiento = LocalDate.of(
                 anioVencimiento,
-                titular.getFechaNacimiento.getMonth(),
-                titular.getFechaNacimiento.getDayOfMonth()
-            );
-
-            nuevaLicencia.setFechaVencimiento(java.sql.Date.valueOf(fechaVencimiento));
+                fechaNacimiento.getMonth(),
+                fechaNacimiento.getDayOfMonth()
         );
 
-            return nuevaLicencia;
-        }
-    */
+        // Establecer la fecha de vencimiento en la licencia (conversión a java.sql.Date)
+        nuevaLicencia.setFechaVencimiento(java.sql.Date.valueOf(fechaVencimiento));
+
+        repository.save(nuevaLicencia);
+
+        return nuevaLicencia;
+
+        //FALTA REGISTRAR EL TRÁMITE
+    }
 
     public int calcularVigenciaLicencia(Titular titular, String claseLicencia) {
 
-        LocalDate fechaNacimientoTitular = titular.getFechaNacimiento().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate fechaNacimientoTitular = titular.convertirDateALocalDate(titular.getFechaNacimiento());
         int edadTitular = Period.between(fechaNacimientoTitular, LocalDate.now()).getYears();
 
         int aniosVigencia = 0;
@@ -156,4 +179,8 @@ public class LicenciaServiceImpl implements LicenciaService {
         return aniosVigencia;
     }
 
+    public Licencia buscarLicenciaPorId(Integer id) {
+        return repository.findByIdLicencia(id)
+                .orElseThrow(() -> new RuntimeException("Licencia no encontrada."));
+    }
 }

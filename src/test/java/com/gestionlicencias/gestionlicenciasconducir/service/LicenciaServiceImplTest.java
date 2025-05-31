@@ -7,13 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.gestionlicencias.gestionlicenciasconducir.repository.LicenciaRepository;
+
 class LicenciaServiceImplTest {
 
     private LicenciaService licenciaService;
+    private LicenciaRepository licenciaRepository;
 
     @BeforeEach
     void setUp() {
-        licenciaService = new LicenciaServiceImpl();
+        licenciaService = new LicenciaServiceImpl(licenciaRepository);
     }
 
     @ParameterizedTest

@@ -118,7 +118,7 @@
     <img src="/logo-sfc.png" alt="Santa Fe Capital Logo">
   </div>
   <div class="form-card">
-    <form id="formLicencia" onsubmit="return validarLicencia()" novalidate>
+    <form id="formLicencia" onsubmit="registrarLicencia(event)" novalidate>
       <h2>Registro de Licencia</h2>
       <div class="form-group">
         <label for="tipoDocumento" class="required">Tipo de documento del titular</label>
@@ -160,46 +160,17 @@
     </form>
   </div>
 <script>
-  function validarLicencia() {
-    const claseLicencia = document.getElementById('claseLicencia');
-    let valido = true;
-    let tieneCamposVacios = false;
-
-    [claseLicencia].forEach(field => {
-      field.classList.remove('input-error');
-      const errorMsg = field.parentElement.querySelector('.error-message');
-      if (errorMsg) errorMsg.style.display = 'none';
-    });
-
-    if (claseLicencia.value === "") {
-      claseLicencia.classList.add('input-error');
-      claseLicencia.parentElement.querySelector('.error-message').style.display = 'block';
-      valido = false;
-      tieneCamposVacios = true;
-    }
-
-    if (tieneCamposVacios) {
-      alert('Por favor, complete todos los campos obligatorios.');
-      return false;
-    }
-
-    if (!valido) return false;
-
-    return confirm('¿Está seguro de que desea registrar la licencia?');
-  }
-
-  function buscarTitular() {
+  async function buscarTitular() {
     const tipoDoc = document.getElementById('tipoDocumento');
     const numeroDoc = document.getElementById('numeroDocumento');
     const claseLicencia = document.getElementById('claseLicencia');
     const limitaciones = document.getElementById('limitaciones');
     const btnRegistrar = document.getElementById('btnRegistrar');
 
-    // Limpia errores anteriores
+    // Limpia errores visuales
     tipoDoc.classList.remove('input-error');
     numeroDoc.classList.remove('input-error');
 
-    // Validación de campos obligatorios
     if (tipoDoc.value === "") {
       alert("Debe seleccionar un tipo de documento.");
       tipoDoc.classList.add('input-error');
@@ -213,28 +184,87 @@
       return;
     }
 
-    // Validación del formato según tipo de documento
     if (tipoDoc.value === "DNI" && !/^\d{8}$/.test(valorDoc)) {
-      alert("El DNI debe tener exactamente 8 dígitos numéricos.");
+      alert("El DNI debe tener exactamente 8 dígitos.");
       numeroDoc.classList.add('input-error');
       return;
     } else if (tipoDoc.value !== "DNI" && !/^[a-zA-Z0-9]{8}$/.test(valorDoc)) {
-      alert("El número de documento debe tener 8 caracteres alfanuméricos.");
+      alert("El número debe tener 8 caracteres alfanuméricos.");
       numeroDoc.classList.add('input-error');
       return;
     }
 
-    console.log("Buscando titular con", tipoDoc.value, numeroDoc.value);
+    try {
+      const response = await fetch(`/api/titulares/buscar/titular?tipoDocumento=${tipoDoc.value}&documento=${valorDoc}`)
 
-    // Si pasa todas las validaciones, habilita los campos
-    claseLicencia.disabled = false;
-    limitaciones.disabled = false;
-    btnRegistrar.disabled = false;
+      if (response.ok) {
+        const titular = await response.json();
 
-    alert("Titular encontrado. Complete los demás campos para registrar la licencia.");
+        // Habilita los campos
+        claseLicencia.disabled = false;
+        limitaciones.disabled = false;
+        btnRegistrar.disabled = false;
+
+        alert(`Titular encontrado: ${titular.nombre} ${titular.apellido}. Complete los demás campos.`);
+      } else {
+        claseLicencia.disabled = true;
+        limitaciones.disabled = true;
+        btnRegistrar.disabled = true;
+        alert("Titular no encontrado. No puede registrar la licencia.");
+      }
+    } catch (error) {
+      console.error("Error al buscar titular:", error);
+      alert("Error al consultar el titular.");
+    }
   }
 
-</script>
+  async function registrarLicencia(event) {
+    event.preventDefault(); 
 
+    const tipo = document.getElementById('tipoDocumento').value;
+    const numero = document.getElementById('numeroDocumento').value.trim();
+    const clase = document.getElementById('claseLicencia').value;
+    const observaciones = document.getElementById('limitaciones').value;
+
+    if (clase === "") {
+      alert("Debe seleccionar una clase de licencia.");
+      return;
+    }
+
+    if (!confirm("¿Está seguro de registrar la licencia?")) {
+      return;
+    }
+
+    const licencia = {
+      titular: {
+        tipoDocumento: tipo,
+        documento: numero
+      },
+      clase: clase,
+      observaciones: observaciones
+    };
+
+    try {
+      const response = await fetch('/api/licencias/registrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(licencia)
+      });
+
+      if (response.status === 201) {
+        alert("Licencia registrada con éxito.");
+        location.reload();
+      } else {
+        const data = await response.json();
+        alert("Error: " + (data.error || "No se pudo registrar la licencia."));
+      }
+    } catch (error) {
+      console.error("Error al registrar:", error);
+      alert("Error de red al registrar la licencia.");
+    }
+  }
+</script>
 </body>
 </html>

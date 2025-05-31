@@ -1,5 +1,6 @@
 package com.gestionlicencias.gestionlicenciasconducir.model;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -46,6 +47,9 @@ public class Titular{
     @Column(name = "donante_organos", nullable = false)
     private Boolean donanteOrganos;
 
+    @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Licencia> licencias = new ArrayList<>();
+
     public Titular() {
     }
 
@@ -60,9 +64,6 @@ public class Titular{
     public TipoDocumento getTipoDocumento() {
         return tipoDocumento;
     }
-
-    @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Licencia> licencias = new ArrayList<>();
 
     public void setTipoDocumento(TipoDocumento tipoDocumento) {
         this.tipoDocumento = tipoDocumento;
@@ -141,20 +142,20 @@ public class Titular{
         this.licencias.add(licencia);
     }
 
-    /**
-     * Calcula la edad del titular en años basándose en la fecha de nacimiento.
-     *
-     * @return the age in years
-     * @throws IllegalArgumentException si el campo fechaNacimiento es nulo
-     */
-    public int getEdad() {
-        if (fechaNacimiento == null) {
-            throw new IllegalArgumentException("La fecha de nacimiento no puede ser nula.");
+    public LocalDate convertirDateALocalDate(Date date) {
+        if (date == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula.");
         }
-        // Convertir Date a LocalDate
-        LocalDate birthDate = fechaNacimiento.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate today = LocalDate.now();
-        // Calcular la diferencia en años
-        return Period.between(birthDate, today).getYears();
+
+        if (date instanceof java.sql.Date) {
+            return ((java.sql.Date) date).toLocalDate();
+        } else {
+            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+    }
+    public int getEdad() {
+        LocalDate cumpleanios = convertirDateALocalDate(fechaNacimiento);
+        LocalDate hoy = LocalDate.now();
+        return Period.between(cumpleanios, hoy).getYears();
     }
 }

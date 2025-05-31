@@ -50,6 +50,12 @@ public class TitularServiceImpl implements TitularService {
         return repository.findAll();
     }
 
+    public Titular buscarTitularDocumento(TipoDocumento tipoDocumento, String documento) {
+        Titular titular = repository.findByTipoDocumentoAndDocumento(tipoDocumento, documento)
+                .orElse(null);
+        return titular;
+    }
+
     @Transactional(readOnly = true)
     @Override
     public TitularRecord buscarTitular(TipoDocumento tipoDocumento, String documento) {

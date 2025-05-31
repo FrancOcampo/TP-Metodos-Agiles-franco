@@ -15,30 +15,30 @@ public record TitularRecord(
     @NotNull(message = "El documento no puede ser nulo")
     @Length(max = 8, message = "El documento debe tener como maximo 8 caracteres")
     String documento,
-    @NotBlank(message = "El nombre no puede estar vacío")
-    @NotNull(message = "El nombre no puede ser nulo")
-    @Length(max = 50, message = "El nombre debe tener como maximo 50 caracteres")
+    /* @NotBlank(message = "El nombre no puede estar vacío")
+    @NotNull(message = "El nombre no puede ser nulo") */
+    @Length(max = 50, message = "El nombre debe tener como maximo 50 caracteres") 
     String nombre,
-    @NotBlank(message = "El apellido no puede estar vacío")
-    @NotNull(message = "El apellido no puede ser nulo")
-    @Length(max = 50, message = "El apellido debe tener como maximo 50 caracteres")
+    /* @NotBlank(message = "El apellido no puede estar vacío")
+    @NotNull(message = "El apellido no puede ser nulo") */
+    @Length(max = 50, message = "El apellido debe tener como maximo 50 caracteres") 
     String apellido,
-    @NotNull(message = "La fecha de nacimiento no puede ser nula")
-    @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
+    /* @NotNull(message = "La fecha de nacimiento no puede ser nula") */
+    @Past(message = "La fecha de nacimiento debe ser una fecha pasada") 
     Date fechaNacimiento,
-    @NotBlank(message = "La dirección no puede estar vacía")
-    @NotNull(message = "La dirección no puede ser nula")
+    /* @NotBlank(message = "La dirección no puede estar vacía")
+    @NotNull(message = "La dirección no puede ser nula") */
     @Length(max = 100, message = "La dirección debe tener como maximo 100 caracteres")
     String direccion,
-    @NotBlank(message = "El grupo sanguineo no puede estar vacío")
-    @NotNull(message = "El grupo sanguineo no puede ser nulo")
+    /* @NotBlank(message = "El grupo sanguineo no puede estar vacío")
+    @NotNull(message = "El grupo sanguineo no puede ser nulo") */
     @Length(max = 3, message = "El grupo sanguineo debe tener como maximo 3 caracteres")
     String grupoSanguineo,
-    @NotBlank(message = "El factor RH no puede estar vacío")
-    @NotNull(message = "El factor RH no puede ser nulo")
+    /* @NotBlank(message = "El factor RH no puede estar vacío")
+    @NotNull(message = "El factor RH no puede ser nulo") */
     @Length(max = 12, message = "El factor RH debe tener como maximo 12 caracteres")
     String factorRH,
-    @NotNull(message = "El donante de organos no puede ser nulo")
+    /* @NotNull(message = "El donante de organos no puede ser nulo") */
     Boolean donanteOrganos
 ) {
     //Conviene sacar este metodo ya que se pasa la responsabilidad al mapper
