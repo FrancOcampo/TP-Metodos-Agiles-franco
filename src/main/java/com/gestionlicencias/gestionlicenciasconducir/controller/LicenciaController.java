@@ -104,6 +104,23 @@ public class LicenciaController {
 
         return "comprobanteTramite";
     }
+
+    @GetMapping("/imprimirLicencia")
+    public String mostrarLicencia(
+        @RequestParam("tipoDocumento") TipoDocumento tipoDocumento,
+        @RequestParam("documento") String documento,
+        Model model) {
+
+        // Buscar titular
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+
+        Licencia licencia = licenciaService.obtenerUltimaLicenciaTitular(titular);
+
+        model.addAttribute("titular", titular);
+        model.addAttribute("licencia", licencia);
+
+        return "impresionLicencia";
+    }
     
 
 }

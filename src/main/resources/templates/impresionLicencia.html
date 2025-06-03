@@ -112,18 +112,22 @@
     }
 
     .print-button button {
-      font-size: 15px;
+      display: block;
+      background-color: #16c79a;
+      color: #fff;
       padding: 12px 24px;
-      background-color: #0b84ff;
-      color: white;
+      font-size: 15px;
       border: none;
-      border-radius: 6px;
+      border-radius: 30px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      margin: 0 auto;
+      margin-top: 20px;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 1px 4px rgba(22,199,154,0.08);
     }
-
     .print-button button:hover {
-      background-color: #0964c9;
+      background-color: #13b088;
+      color: #fff;
     }
 
     @media print {
@@ -158,15 +162,15 @@
     <div class="section-title">Datos del titular</div>
     <div class="line">
       <span class="label">Nombre/s y apellido/s:</span>
-      <span class="value" th:text="${nombre} + ' ' + ${apellido}"></span>
+      <span class="value" th:text="${titular.nombre} + ' ' + ${titular.apellido}"></span>
     </div>
     <div class="line">
       <span class="label">Tipo de documento:</span>
-      <span class="value" th:text="${tipoDocumento}"></span>
+      <span class="value" th:text="${titular.tipoDocumento}"></span>
     </div>
     <div class="line">
       <span class="label">Número de documento:</span>
-      <span class="value" th:text="${numeroDocumento}"></span>
+      <span class="value" th:text="${titular.documento}"></span>
     </div>
   </div>
 
@@ -174,24 +178,24 @@
     <div class="section-title">Datos de la licencia</div>
     <div class="line">
       <span class="label">Clase de licencia:</span>
-      <span class="value" th:text="${claseLicencia}"></span>
+      <span class="value" th:text="${licencia.clase}"></span>
     </div>
     <div class="line">
       <span class="label">Fecha de emisión:</span>
-      <span class="value" th:text="${fechaActual}"></span>
+      <span class="value" th:text="${licencia.fechaInicio}"></span>
     </div>
     <div class="line">
       <span class="label">Fecha de vencimiento:</span>
-      <span class="value" th:text="${fechaVencimiento}"></span>
+      <span class="value" th:text="${licencia.fechaVencimiento}"></span>
     </div>
     <div class="line">
       <span class="label">Observaciones:</span>
-      <span class="value" th:text="${limitaciones != null && !#strings.isEmpty(limitaciones) ? limitaciones : 'Sin observaciones'}"></span>
+      <span class="value" th:text="${licencia.observaciones != null && !#strings.isEmpty(licencia.observaciones) ? licencia.observaciones : 'Sin observaciones'}"></span>
     </div>
   </div>
 
   <div class="footer">
-    <div class="fecha">Emitido en fecha: <span th:text="${fechaActual}"></span></div>
+    <div class="fecha">Emitido en fecha: <span th:text="${licencia.fechaInicio}"></span></div>
     <div class="firma">Firma y sello autorizado</div>
   </div>
 </div>
