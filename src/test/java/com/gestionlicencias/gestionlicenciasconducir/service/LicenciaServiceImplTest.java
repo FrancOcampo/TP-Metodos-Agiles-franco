@@ -1,12 +1,23 @@
 package com.gestionlicencias.gestionlicenciasconducir.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
+import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
+import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
+import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.repository.LicenciaRepository;
 
 class LicenciaServiceImplTest {
@@ -18,6 +29,9 @@ class LicenciaServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        licenciaRepository = mock(LicenciaRepository.class);
+        tramiteService = mock(TramiteService.class);
+        usuarioService = mock(UsuarioService.class);
         licenciaService = new LicenciaServiceImpl(licenciaRepository, tramiteService, usuarioService);
     }
 
@@ -100,4 +114,72 @@ class LicenciaServiceImplTest {
 
         assertTrue(exception.getMessage().contains("Vigencia no válida"));
     }
+
+    @Test
+    void buscarLicenciasVigentes_filtraPorNombreYDonante() {
+        Titular t = new Titular();
+        t.setTipoDocumento(TipoDocumento.DNI);
+        t.setDocumento("12345678");
+        t.setNombre("Ana");
+        t.setApellido("Martínez");
+        t.setFechaNacimiento(Date.valueOf(LocalDate.of(1990, 1, 1)));
+        t.setDireccion("Calle A");
+        t.setGrupoSanguineo("A");
+        t.setFactorRH("+");
+        t.setDonanteOrganos(true);
+
+        Licencia l = new Licencia();
+        l.setClase("B");
+        l.setObservaciones("Obs");
+        l.setFechaVencimiento(Date.valueOf(LocalDate.now().plusDays(90)));
+        l.setTitular(t);
+
+        when(licenciaRepository.findByFechaVencimientoAfter(any(LocalDate.class)))
+            .thenReturn(List.of(l));
+
+        List<LicenciaRecord> resultado = licenciaService
+            .buscarLicenciasVigentes("ana", "A", "+", true);
+
+        assertEquals(1, resultado.size());
+        assertEquals("Ana", resultado.get(0).titular().nombre());
+    }
+
+    @Test
+    void buscarLicenciasVigentes_sinCoincidencias_retornaListaVacia() {
+        when(licenciaRepository.findByFechaVencimientoAfter(any(LocalDate.class)))
+            .thenReturn(List.of());
+
+        List<LicenciaRecord> resultado = licenciaService
+            .buscarLicenciasVigentes("Pedro", "0", "0", false);
+
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    void buscarLicenciasVigentes_filtraSoloGrupoSanguineo() {
+        Titular a = new Titular();
+        a.setNombre("Mario"); a.setGrupoSanguineo("O"); a.setFactorRH("+");
+        a.setFechaNacimiento(Date.valueOf(LocalDate.of(1980, 5, 1))); a.setDonanteOrganos(false);
+        Licencia la = new Licencia(); la.setClase("A");
+        la.setFechaVencimiento(Date.valueOf(LocalDate.now().plusMonths(6))); la.setTitular(a);
+
+        Titular b = new Titular();
+        b.setNombre("Silvia"); b.setGrupoSanguineo("A"); b.setFactorRH("+");
+        b.setFechaNacimiento(Date.valueOf(LocalDate.of(1990, 7, 1))); b.setDonanteOrganos(false);
+        Licencia lb = new Licencia(); lb.setClase("B");
+        lb.setFechaVencimiento(Date.valueOf(LocalDate.now().plusMonths(6))); lb.setTitular(b);
+
+        when(licenciaRepository.findByFechaVencimientoAfter(any(LocalDate.class)))
+            .thenReturn(List.of(la, lb));
+
+        List<LicenciaRecord> r = licenciaService.buscarLicenciasVigentes(
+            "",        // nombreApellido    
+            "O",       // grupoSanguineo    
+            "",        // factorRH          
+            false);    // donanteOrganos    
+
+        assertEquals(1, r.size());
+        assertEquals("Mario", r.get(0).titular().nombre());
+    }
+
 } 

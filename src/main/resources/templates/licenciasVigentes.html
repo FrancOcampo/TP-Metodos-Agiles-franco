@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar licencias vigentes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #fff;
+      margin: 0;
+      padding: 0 20px;
+    }
+
+    .header-sfc {
+      width: 100vw;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(22,199,154,0.08);
+      padding: 18px 40px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .header-sfc img {
+      height: 80px;
+    }
+
+    .form-card {
+      background: #fff;
+      padding: 32px;
+      border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(22,199,154,0.10);
+      width: 100%;
+      margin: 0 auto 40px auto;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      color: #16c79a;
+      font-weight: 700;
+      margin-bottom: 28px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fdfdfd;
+    }
+
+    .btn {
+      background-color: #16c79a;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background-color: #13b088;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center; 
+      font-size: 14px;
+      overflow-wrap: break-word;
+    }
+
+    th {
+      background-color: #e6f9f3;
+      color: #16c79a;
+      font-weight: bold;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+      width: 20%; /* Nombre y apellido */
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+      width: 8%; /* Documento */
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+      width: 10%; /* Fecha de nacimiento */
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+      width: 20%; /* Dirección */
+    }
+
+    th:nth-child(5), td:nth-child(5) {
+      width: 8%; /* Grupo sanguíneo */
+    }
+
+    th:nth-child(6), td:nth-child(6) {
+      width: 6%; /* RH */
+    }
+
+    th:nth-child(7), td:nth-child(7) {
+      width: 8%; /* Donante */
+    }
+
+    th:nth-child(8), td:nth-child(8) {
+      width: 10%; /* Clase */
+    }
+
+    th:nth-child(9), td:nth-child(9) {
+      width: 8%; /* Vencimiento */
+    }
+  </style>
+</head>
+<body>
+  <div class="header-sfc">
+    <img src="/logo-sfc.png" alt="Santa Fe Capital Logo" />
+  </div>
+
+  <div class="form-card">
+    <h2>Buscar licencias vigentes</h2>
+
+    <form id="form-busqueda" onsubmit="buscarLicencias(event)">
+      <div class="row mb-3">
+        <div class="col-md-6 form-group">
+          <label for="nombreApellido">Nombre y/o apellido</label>
+          <input
+            type="text"
+            id="nombreApellido"
+            name="nombreApellido"
+            placeholder="Buscar por nombre o apellido"
+          />
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="grupoSanguineo">Grupo sanguíneo</label>
+          <select id="grupoSanguineo" name="grupoSanguineo">
+            <option value="">Todos</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
+          </select>
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="factorRH">Factor RH</label>
+          <select id="factorRH" name="factorRH">
+            <option value="">Todos</option>
+            <option value="+">Positivo (+)</option>
+            <option value="-">Negativo (-)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checkbox-container mb-3">
+        <input type="checkbox" id="donanteOrganos" name="donanteOrganos" value="true" />
+        <label for="donanteOrganos">Sólo donantes de órganos</label>
+      </div>
+
+      <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <table id="tabla-licencias" style="display: none;">
+      <thead>
+        <tr>
+          <th>Nombre y apellido</th>
+          <th>Documento</th>
+          <th>Fecha de nacimiento</th>
+          <th>Dirección</th>
+          <th>Grupo Sanguíneo</th>
+          <th>RH</th>
+          <th>Donante</th>
+          <th>Clase de licencia</th>
+          <th>Vencimiento</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    function formatearFecha(fechaIso) {
+      const fecha = new Date(fechaIso);
+      const dia = String(fecha.getDate()).padStart(2, "0");
+      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const anio = fecha.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    }
+
+    async function buscarLicencias(event) {
+      if (event) event.preventDefault();
+
+      const nombreApellido = document.getElementById("nombreApellido").value;
+      const grupoSanguineo = document.getElementById("grupoSanguineo").value;
+      const factorRH = document.getElementById("factorRH").value;
+      const donanteOrganos = document.getElementById("donanteOrganos").checked;
+
+      const params = new URLSearchParams({
+        nombreApellido,
+        grupoSanguineo,
+        factorRH,
+        donanteOrganos,
+      });
+
+      try {
+        const response = await fetch(`/api/licencias/vigentes?${params.toString()}`);
+        if (!response.ok) throw new Error("Error en la respuesta del servidor");
+
+        const data = await response.json();
+
+        const tbody = document.querySelector("#tabla-licencias tbody");
+        const tabla = document.getElementById("tabla-licencias");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+          tabla.style.display = "none";
+          alert("No se encontraron licencias con esos criterios.");
+          return;
+        }
+
+        tabla.style.display = "table";
+
+        data.forEach((licencia) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${licencia.titular.nombre} ${licencia.titular.apellido}</td>
+            <td>${licencia.titular.documento}</td>
+            <td>${formatearFecha(licencia.titular.fechaNacimiento)}</td>
+            <td>${licencia.titular.direccion}</td>
+            <td>${licencia.titular.grupoSanguineo}</td>
+            <td>${licencia.titular.factorRH}</td>
+            <td>${licencia.titular.donanteOrganos ? "Sí" : "No"}</td>
+            <td>${licencia.clase}</td>
+            <td>${formatearFecha(licencia.fechaVencimiento)}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        alert("Ocurrió un error al buscar licencias: " + error.message);
+        console.error(error);
+      }
+    }
+
+    window.addEventListener("load", () => {
+      buscarLicencias();
+    });
+  </script>
+</body>
+</html>

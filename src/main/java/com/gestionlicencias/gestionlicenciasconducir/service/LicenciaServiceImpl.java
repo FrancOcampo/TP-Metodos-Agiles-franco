@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
+import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
@@ -217,5 +219,46 @@ public class LicenciaServiceImpl implements LicenciaService {
 
     public Licencia obtenerUltimaLicenciaTitular(Titular titular) {
         return repository.findFirstByTitularOrderByFechaInicioDesc(titular);
+    }
+
+    @Override
+    public List<LicenciaRecord> buscarLicenciasVigentes(String nombreApellido, String grupoSanguineo, String factorRH, boolean donanteOrganos) {
+        LocalDate hoy = LocalDate.now();
+        List<Licencia> vigentes = repository.findByFechaVencimientoAfter(hoy);
+
+        return vigentes.stream()
+            .filter(licencia -> {
+                Titular t = licencia.getTitular();
+                boolean coincideNombre = (nombreApellido == null || nombreApellido.isBlank()) ||
+                    t.getNombre().toLowerCase().contains(nombreApellido.toLowerCase()) ||
+                    t.getApellido().toLowerCase().contains(nombreApellido.toLowerCase());
+                boolean coincideGrupo = (grupoSanguineo == null || grupoSanguineo.isBlank()) ||
+                    grupoSanguineo.equalsIgnoreCase(t.getGrupoSanguineo());
+                boolean coincideRH = (factorRH == null || factorRH.isBlank()) ||
+                    factorRH.equalsIgnoreCase(t.getFactorRH());
+                boolean coincideDonante = !donanteOrganos || t.getDonanteOrganos();
+                return coincideNombre && coincideGrupo && coincideRH && coincideDonante;
+            })
+            .map(licencia -> {
+                Titular t = licencia.getTitular();
+                TitularRecord titularRecord = new TitularRecord(
+                    t.getTipoDocumento(),
+                    t.getDocumento(),
+                    t.getNombre(),
+                    t.getApellido(),
+                    t.getFechaNacimiento(),
+                    t.getDireccion(),
+                    t.getGrupoSanguineo(),
+                    t.getFactorRH(),
+                    t.getDonanteOrganos()
+                );
+                return new LicenciaRecord(
+                    licencia.getClase(),
+                    licencia.getObservaciones(),
+                    titularRecord,
+                    new java.sql.Date(licencia.getFechaVencimiento().getTime())
+                );
+            })
+            .toList();
     }
 }

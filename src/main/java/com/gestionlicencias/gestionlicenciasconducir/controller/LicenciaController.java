@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -121,6 +122,20 @@ public class LicenciaController {
 
         return "impresionLicencia";
     }
-    
 
+    @GetMapping("/listarLicenciasVigentes")
+    public String mostrarBusquedaLicencias() {
+        return "licenciasVigentes"; 
+    }
+
+    @GetMapping("/vigentes") 
+    public ResponseEntity<List<LicenciaRecord>> mostrarLicenciasVigentes(
+        @RequestParam(required = false) String nombreApellido,
+        @RequestParam(required = false) String grupoSanguineo,
+        @RequestParam(required = false) String factorRH,
+        @RequestParam(required = false, defaultValue = "false") boolean donanteOrganos) {
+
+        List<LicenciaRecord> licencias = licenciaService.buscarLicenciasVigentes(nombreApellido, grupoSanguineo, factorRH, donanteOrganos);
+        return ResponseEntity.ok(licencias);
+    }
 }

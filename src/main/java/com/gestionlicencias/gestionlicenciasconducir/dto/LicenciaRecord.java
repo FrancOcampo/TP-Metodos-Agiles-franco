@@ -2,6 +2,8 @@ package com.gestionlicencias.gestionlicenciasconducir.dto;
 
 import jakarta.validation.constraints.NotNull;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
+import java.sql.Date;
+
 import org.hibernate.validator.constraints.Length; 
 
 public record LicenciaRecord(
@@ -11,12 +13,14 @@ public record LicenciaRecord(
     @Length(max = 100, message = "Las observaciones deben tener como maximo 100 caracteres")
     String observaciones,
     @NotNull(message = "El titular es requerido")
-    TitularRecord titular
+    TitularRecord titular,
+    Date fechaVencimiento
 ) {
     public Licencia toLicencia() {
         Licencia licencia = new Licencia();
         licencia.setClase(this.clase);
         licencia.setObservaciones(this.observaciones);
+        licencia.setFechaVencimiento(this.fechaVencimiento);
         licencia.setTitular(this.titular.toTitular());
         return licencia;
     }
