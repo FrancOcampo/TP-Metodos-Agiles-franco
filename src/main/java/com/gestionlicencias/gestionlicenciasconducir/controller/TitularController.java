@@ -76,12 +76,6 @@ public class TitularController {
             @PathVariable String documento,
             @RequestBody @Valid TitularRecord titularModificado) {
 
-        // Validar que el tipo y nro documento en la URL coincidan con los del body
-        if (!tipoDocumento.equals(titularModificado.tipoDocumento()) ||
-            !documento.equals(titularModificado.documento())) {
-            return ResponseEntity.badRequest().build();
-        }
-
         try {
             service.actualizarTitular(tipoDocumento, documento, titularModificado);
             return ResponseEntity.noContent().build();
