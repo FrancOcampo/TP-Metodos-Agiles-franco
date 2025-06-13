@@ -138,4 +138,9 @@ public class LicenciaController {
         List<LicenciaRecord> licencias = licenciaService.buscarLicenciasVigentes(nombreApellido, grupoSanguineo, factorRH, donanteOrganos);
         return ResponseEntity.ok(licencias);
     }
+
+    @GetMapping
+    public String mostrarMenu() {  
+        return "menuLicencia";
+    }
 }

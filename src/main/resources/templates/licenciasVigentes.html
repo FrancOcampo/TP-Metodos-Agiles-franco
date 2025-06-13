@@ -12,7 +12,6 @@
       margin: 0;
       padding: 0 20px;
     }
-
     .header-sfc {
       width: 100vw;
       background: #fff;
@@ -23,11 +22,9 @@
       align-items: center;
       box-sizing: border-box;
     }
-
     .header-sfc img {
       height: 80px;
     }
-
     .form-card {
       background: #fff;
       padding: 32px;
@@ -37,19 +34,16 @@
       margin: 0 auto 40px auto;
       box-sizing: border-box;
     }
-
     h2 {
       color: #16c79a;
       font-weight: 700;
       margin-bottom: 28px;
     }
-
     .form-group label {
       font-weight: bold;
       color: #333;
       margin-bottom: 5px;
     }
-
     .form-group input,
     .form-group select {
       width: 100%;
@@ -59,7 +53,6 @@
       border-radius: 8px;
       background-color: #fdfdfd;
     }
-
     .btn {
       background-color: #16c79a;
       color: white;
@@ -69,69 +62,46 @@
       cursor: pointer;
       font-size: 15px;
       transition: background 0.3s ease;
-      margin-top: 20px;
     }
-
     .btn:hover {
       background-color: #13b088;
     }
-
     table {
       width: 100%;
       margin-top: 30px;
       border-collapse: collapse;
       table-layout: fixed;
     }
-
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
-      text-align: center; 
+      text-align: center;
       font-size: 14px;
       overflow-wrap: break-word;
     }
-
     th {
       background-color: #e6f9f3;
       color: #16c79a;
       font-weight: bold;
     }
-
-    th:nth-child(1), td:nth-child(1) {
-      width: 20%; /* Nombre y apellido */
+    tr.selected-row {
+      background-color: #c7f0e6 !important;
     }
-
-    th:nth-child(2), td:nth-child(2) {
-      width: 8%; /* Documento */
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      justify-content: flex-end;
     }
-
-    th:nth-child(3), td:nth-child(3) {
-      width: 10%; /* Fecha de nacimiento */
-    }
-
-    th:nth-child(4), td:nth-child(4) {
-      width: 20%; /* Dirección */
-    }
-
-    th:nth-child(5), td:nth-child(5) {
-      width: 8%; /* Grupo sanguíneo */
-    }
-
-    th:nth-child(6), td:nth-child(6) {
-      width: 6%; /* RH */
-    }
-
-    th:nth-child(7), td:nth-child(7) {
-      width: 8%; /* Donante */
-    }
-
-    th:nth-child(8), td:nth-child(8) {
-      width: 10%; /* Clase */
-    }
-
-    th:nth-child(9), td:nth-child(9) {
-      width: 8%; /* Vencimiento */
-    }
+    th:nth-child(1), td:nth-child(1) { width: 20%; }
+    th:nth-child(2), td:nth-child(2) { width: 8%; }
+    th:nth-child(3), td:nth-child(3) { width: 10%; }
+    th:nth-child(4), td:nth-child(4) { width: 20%; }
+    th:nth-child(5), td:nth-child(5) { width: 8%; }
+    th:nth-child(6), td:nth-child(6) { width: 6%; }
+    th:nth-child(7), td:nth-child(7) { width: 8%; }
+    th:nth-child(8), td:nth-child(8) { width: 10%; }
+    th:nth-child(9), td:nth-child(9) { width: 8%; }
   </style>
 </head>
 <body>
@@ -146,12 +116,7 @@
       <div class="row mb-3">
         <div class="col-md-6 form-group">
           <label for="nombreApellido">Nombre y/o apellido</label>
-          <input
-            type="text"
-            id="nombreApellido"
-            name="nombreApellido"
-            placeholder="Buscar por nombre o apellido"
-          />
+          <input type="text" id="nombreApellido" name="nombreApellido" placeholder="Buscar por nombre o apellido" />
         </div>
         <div class="col-md-3 form-group">
           <label for="grupoSanguineo">Grupo sanguíneo</label>
@@ -173,7 +138,7 @@
         </div>
       </div>
 
-      <div class="checkbox-container mb-3">
+      <div class="mb-3">
         <input type="checkbox" id="donanteOrganos" name="donanteOrganos" value="true" />
         <label for="donanteOrganos">Sólo donantes de órganos</label>
       </div>
@@ -197,9 +162,16 @@
       </thead>
       <tbody></tbody>
     </table>
+
+    <div class="action-buttons" id="botones-acciones">
+      <button class="btn" onclick="renovarLicencia()">Renovar</button>
+      <button class="btn" onclick="emitirCopia()">Emitir copia</button>
+    </div>
   </div>
 
   <script>
+    let licenciaSeleccionadaTitular = null;
+
     function formatearFecha(fechaIso) {
       const fecha = new Date(fechaIso);
       const dia = String(fecha.getDate()).padStart(2, "0");
@@ -210,6 +182,8 @@
 
     async function buscarLicencias(event) {
       if (event) event.preventDefault();
+
+      licenciaSeleccionadaTitular = null;
 
       const nombreApellido = document.getElementById("nombreApellido").value;
       const grupoSanguineo = document.getElementById("grupoSanguineo").value;
@@ -228,7 +202,6 @@
         if (!response.ok) throw new Error("Error en la respuesta del servidor");
 
         const data = await response.json();
-
         const tbody = document.querySelector("#tabla-licencias tbody");
         const tabla = document.getElementById("tabla-licencias");
         tbody.innerHTML = "";
@@ -254,12 +227,36 @@
             <td>${licencia.clase}</td>
             <td>${formatearFecha(licencia.fechaVencimiento)}</td>
           `;
+
+          row.addEventListener("click", () => {
+            document.querySelectorAll("#tabla-licencias tbody tr").forEach(tr => tr.classList.remove("selected-row"));
+            row.classList.add("selected-row");
+            licenciaSeleccionadaTitular = licencia.titular.nombre;
+          });
+
           tbody.appendChild(row);
         });
+
       } catch (error) {
         alert("Ocurrió un error al buscar licencias: " + error.message);
         console.error(error);
       }
+    }
+
+    function renovarLicencia() {
+      if (!licenciaSeleccionadaTitular) {
+        alert("Por favor, seleccione una licencia.");
+        return;
+      }
+      alert(`Renovar licencia de titular ${licenciaSeleccionadaTitular}`);
+    }
+
+    function emitirCopia() {
+      if (!licenciaSeleccionadaTitular) {
+        alert("Por favor, seleccione una licencia.");
+        return;
+      }
+      alert(`Emitir copia de licencia de titular ${licenciaSeleccionadaTitular}`);
     }
 
     window.addEventListener("load", () => {

@@ -84,7 +84,7 @@ public class TitularController {
     public String mostrarFormularioEliminar() {   return "eliminarTitular";    }
 
     //listar
-    @GetMapping("/listar")
+    @GetMapping("/buscarTitulares")
     public String mostrarFormularioListar() {   return "listarTitular";    }
 
 }
