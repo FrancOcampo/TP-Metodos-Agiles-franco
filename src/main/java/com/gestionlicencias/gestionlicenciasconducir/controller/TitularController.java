@@ -12,6 +12,7 @@ import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 /*Estas son anotaciones para la documentación de la API
@@ -66,6 +67,28 @@ public class TitularController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             //Alternativa
             //return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+   @PutMapping("/modificar/{tipoDocumento}/{documento}")
+    public ResponseEntity<Void> modificarTitular(
+            @PathVariable TipoDocumento tipoDocumento,
+            @PathVariable String documento,
+            @RequestBody @Valid TitularRecord titularModificado) {
+
+        // Validar que el tipo y nro documento en la URL coincidan con los del body
+        if (!tipoDocumento.equals(titularModificado.tipoDocumento()) ||
+            !documento.equals(titularModificado.documento())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            service.actualizarTitular(tipoDocumento, documento, titularModificado);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

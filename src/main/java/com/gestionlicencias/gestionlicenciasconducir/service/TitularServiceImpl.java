@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.repository.TitularRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 
 @Service
@@ -77,6 +80,23 @@ public class TitularServiceImpl implements TitularService {
               titular.getDonanteOrganos()
             );
         */
+    }
+
+    public void actualizarTitular(TipoDocumento tipoDocumento, String documento, TitularRecord titularModificado) {
+        Titular titularExistente = repository
+            .findByTipoDocumentoAndDocumento(tipoDocumento, documento)
+            .orElseThrow(() -> new EntityNotFoundException("Titular no encontrado"));
+
+        // Actualizar campos (excepto tipo y nro documento)
+        titularExistente.setNombre(titularModificado.nombre());
+        titularExistente.setApellido(titularModificado.apellido());
+        titularExistente.setFechaNacimiento(titularModificado.fechaNacimiento());
+        titularExistente.setDireccion(titularModificado.direccion());
+        titularExistente.setGrupoSanguineo(titularModificado.grupoSanguineo());
+        titularExistente.setFactorRH(titularModificado.factorRH());
+        titularExistente.setDonanteOrganos(titularModificado.donanteOrganos());
+
+        repository.save(titularExistente);
     }
     
 }
