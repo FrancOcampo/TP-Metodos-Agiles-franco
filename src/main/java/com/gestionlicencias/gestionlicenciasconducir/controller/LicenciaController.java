@@ -3,6 +3,7 @@ package com.gestionlicencias.gestionlicenciasconducir.controller;
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaListadoRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
@@ -151,12 +152,12 @@ public class LicenciaController {
         }
     )
     @GetMapping("/noVigentes")
-    public ResponseEntity<List<LicenciaRecord>> mostrarLicenciasNoVigentes(
+    public ResponseEntity<List<LicenciaListadoRecord>> mostrarLicenciasNoVigentes(
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaDesde,
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaHasta,
         @RequestParam(required = false) String clase) {
         
-        List<LicenciaRecord> licencias = licenciaService.buscarLicenciasNoVigentes(fechaDesde, fechaHasta, clase);
+        List<LicenciaListadoRecord> licencias = licenciaService.buscarLicenciasNoVigentes(fechaDesde, fechaHasta, clase);
         return ResponseEntity.ok(licencias);
     }
 

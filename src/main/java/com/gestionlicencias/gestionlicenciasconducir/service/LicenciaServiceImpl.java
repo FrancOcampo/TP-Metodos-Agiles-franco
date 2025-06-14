@@ -3,6 +3,8 @@ package com.gestionlicencias.gestionlicenciasconducir.service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaListadoRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
 import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
@@ -261,4 +264,26 @@ public class LicenciaServiceImpl implements LicenciaService {
             })
             .toList();
     }
+
+    @Override
+    public List<LicenciaListadoRecord> buscarLicenciasNoVigentes(Date fechaDesde, Date fechaHasta, String clase) {
+        LocalDate hoy = LocalDate.now();
+        List<LicenciaListadoRecord> licenciasRecord = new ArrayList<>();
+        
+        List<Licencia> licencias = repository.findLicenciasNoVigentes(hoy, fechaDesde, fechaHasta, clase);
+
+        for(Licencia l : licencias) {
+            LicenciaListadoRecord lr = new LicenciaListadoRecord(
+                l.getTitular().getNombre() + " " + l.getTitular().getApellido(), 
+                l.getIdLicencia(), 
+                l.getClase(), 
+                "No vigente",
+                l.getFechaVencimiento()
+            );
+            licenciasRecord.add(lr);
+        }
+        
+        return licenciasRecord;
+    }
+
 }
