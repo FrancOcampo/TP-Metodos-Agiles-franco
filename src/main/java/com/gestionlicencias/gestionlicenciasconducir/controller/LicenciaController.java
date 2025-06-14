@@ -15,10 +15,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -136,6 +138,25 @@ public class LicenciaController {
         @RequestParam(required = false, defaultValue = "false") boolean donanteOrganos) {
 
         List<LicenciaRecord> licencias = licenciaService.buscarLicenciasVigentes(nombreApellido, grupoSanguineo, factorRH, donanteOrganos);
+        return ResponseEntity.ok(licencias);
+    }
+
+    @Operation(
+        summary = "Buscar licencias no vigentes",
+        description = "Busca licencias no vigentes por fecha de emisión y clase",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Licencias no vigentes encontradas"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    @GetMapping("/noVigentes")
+    public ResponseEntity<List<LicenciaRecord>> mostrarLicenciasNoVigentes(
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaDesde,
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaHasta,
+        @RequestParam(required = false) String clase) {
+        
+        List<LicenciaRecord> licencias = licenciaService.buscarLicenciasNoVigentes(fechaDesde, fechaHasta, clase);
         return ResponseEntity.ok(licencias);
     }
 
