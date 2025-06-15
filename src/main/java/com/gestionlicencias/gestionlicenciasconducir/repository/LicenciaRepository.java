@@ -17,15 +17,11 @@ public interface LicenciaRepository extends JpaRepository<Licencia, Integer> {
     List<Licencia> findByFechaVencimientoAfter(LocalDate fecha);
     
     @Query("SELECT l FROM Licencia l WHERE l.fechaVencimiento < :hoy " +
-           "AND (:fechaDesde IS NULL OR l.fechaVencimiento >= :fechaDesde) " +
-           "AND (:fechaHasta IS NULL OR l.fechaVencimiento <= :fechaHasta) " +
            "AND (:clase IS NULL OR l.clase = :clase) " +
            "AND NOT EXISTS (SELECT l2 FROM Licencia l2 WHERE l2.titular = l.titular " +
            "AND l2.fechaVencimiento > :hoy)")
     List<Licencia> findLicenciasNoVigentes(
-        @Param("hoy") LocalDate hoy,
-        @Param("fechaDesde") Date fechaDesde,
-        @Param("fechaHasta") Date fechaHasta,
+        @Param("hoy") Date hoy,
         @Param("clase") String clase
     );
 }

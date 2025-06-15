@@ -265,14 +265,37 @@ public class LicenciaServiceImpl implements LicenciaService {
             .toList();
     }
 
+    // Metodo auxiliar para filtrar licencias por fechas de forma provisoria
+    private List<Licencia> buscarLicenciasPorFechas(Date fechaDesde, Date fechaHasta, List<Licencia> todas) {
+        List<Licencia> filtradas = new ArrayList<>();
+        for (Licencia l : todas) {
+            Date fechaVenc = l.getFechaVencimiento();
+            boolean desdeOk = (fechaDesde == null) || !fechaVenc.before(fechaDesde);
+            boolean hastaOk = (fechaHasta == null) || !fechaVenc.after(fechaHasta);
+            if (desdeOk && hastaOk) {
+                filtradas.add(l);
+            }
+        }
+        return filtradas;
+    }
+
     @Override
     public List<LicenciaListadoRecord> buscarLicenciasNoVigentes(Date fechaDesde, Date fechaHasta, String clase) {
-        LocalDate hoy = LocalDate.now();
+        Date hoy = java.sql.Date.valueOf(java.time.LocalDate.now());
+
         List<LicenciaListadoRecord> licenciasRecord = new ArrayList<>();
         
-        List<Licencia> licencias = repository.findLicenciasNoVigentes(hoy, fechaDesde, fechaHasta, clase);
+        List<Licencia> licencias = repository.findLicenciasNoVigentes(hoy, clase);
+        /*
+         * SOLUCIÓN PROVISORIA: Tuve inconvenientes con la consulta de JPA
+         * que no filtraba correctamente por fecha de vencimiento.
+         * Habría que revisar la consulta para que funcione correctamente.
+         * Por ahora, filtramos por fechas en memoria (esto es muy inficiente
+         * si hay muchas licencias, pero es una solución provisoria).
+        */
+        List<Licencia> filtradas = buscarLicenciasPorFechas(fechaDesde, fechaHasta, licencias);
 
-        for(Licencia l : licencias) {
+        for(Licencia l : filtradas) {
             LicenciaListadoRecord lr = new LicenciaListadoRecord(
                 l.getTitular().getNombre() + " " + l.getTitular().getApellido(), 
                 l.getIdLicencia(), 
