@@ -21,6 +21,11 @@ public class UsuarioController {
         return "menuOpcionesUsuarioAdministrador";
     }
 
+    @GetMapping("/login") 
+    String mostrarLogin() {
+        return "login";
+    }
+
 }
 
 
