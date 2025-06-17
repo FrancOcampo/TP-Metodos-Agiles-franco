@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Licencias Vencidas - Santa Fe Capital</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="icon" th:href="@{/logo-sfc.png}" type="image/png">
+    <script th:src="@{/js/script.js}"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="header-sfc">
+            <img src="/logo-sfc.png" alt="Santa Fe Capital Logo" />
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="main-title">Buscar licencias vencidas</h1>
+
+        <!-- Search Form -->
+        <div class="search-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dateFrom">Fecha desde</label>
+                    <input type="date" id="dateFrom" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateTo">Fecha hasta</label>
+                    <input type="date" id="dateTo" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="classSelect">Clases</label>
+                    <select id="classSelect" class="form-select" multiple>
+                        <option value="">Todos</option>
+                        <option value="A">Clase A</option>
+                        <option value="B">Clase B</option>
+                        <option value="C">Clase C</option>
+                        <option value="D">Clase D</option>
+                        <option value="E">Clase E</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="button" class="search-btn" onclick="searchLicenses()">Buscar</button>
+        </div>
+
+        <!-- Results Table -->
+        <div class="table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Nombre y apellido</th>
+                        <th>Numero de Licencia</th>
+                        <th>Clase de licencia</th>
+                        <th>Fecha vencimiento</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                    <!-- se rellena por JS-->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button type="button" class="action-btn primary" onclick="renewSelected()">Renovar</button>
+            <button type="button" class="action-btn secondary" onclick="exportData()">Emitir reporte</button>
+        </div>
+    </div>
+
+
+</body>
+</html>

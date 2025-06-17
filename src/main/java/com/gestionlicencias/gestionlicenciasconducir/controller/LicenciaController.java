@@ -2,7 +2,6 @@ package com.gestionlicencias.gestionlicenciasconducir.controller;
 
 import com.gestionlicencias.gestionlicenciasconducir.Exception.ClaseEmisionInvalidaException;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
-import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaListadoRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
@@ -140,6 +139,11 @@ public class LicenciaController {
 
         List<LicenciaRecord> licencias = licenciaService.buscarLicenciasVigentes(nombreApellido, grupoSanguineo, factorRH, donanteOrganos);
         return ResponseEntity.ok(licencias);
+    }
+
+    @GetMapping("/listarLicenciasNoVigentes")
+    public String mostrarBusquedaLicenciasNoVigentes() {
+        return "licenciasNoVigentes";
     }
 
     @Operation(

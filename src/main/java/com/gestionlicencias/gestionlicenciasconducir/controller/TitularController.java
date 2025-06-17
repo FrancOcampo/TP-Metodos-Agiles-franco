@@ -90,7 +90,7 @@ public class TitularController {
     @GetMapping
     public String mostrarMenu() {  return "menuTitular";    }
 
-    @GetMapping("    ")
+    @GetMapping("/registroTitular")
     public String mostrarFormulario() {    return "registroTitular";    }
 
     @GetMapping("/modificar")
