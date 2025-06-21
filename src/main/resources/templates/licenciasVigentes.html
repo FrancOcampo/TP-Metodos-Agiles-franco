@@ -231,7 +231,7 @@
           row.addEventListener("click", () => {
             document.querySelectorAll("#tabla-licencias tbody tr").forEach(tr => tr.classList.remove("selected-row"));
             row.classList.add("selected-row");
-            licenciaSeleccionadaTitular = licencia.titular.nombre;
+            licenciaSeleccionadaTitular = licencia;
           });
 
           tbody.appendChild(row);
@@ -248,7 +248,7 @@
         alert("Por favor, seleccione una licencia.");
         return;
       }
-      alert(`Renovar licencia de titular ${licenciaSeleccionadaTitular}`);
+      alert(`Renovar licencia de titular ${licenciaSeleccionadaTitular.titular.nombre}`);
     }
 
     function emitirCopia() {
@@ -256,7 +256,32 @@
         alert("Por favor, seleccione una licencia.");
         return;
       }
-      alert(`Emitir copia de licencia de titular ${licenciaSeleccionadaTitular}`);
+
+      if (confirm("¿Está seguro de emitir una copia de esta licencia?")) {
+        const tipoDocumento = encodeURIComponent(licenciaSeleccionadaTitular.titular.tipoDocumento);
+        const documento = encodeURIComponent(licenciaSeleccionadaTitular.titular.documento);
+        const claseLicencia = encodeURIComponent(licenciaSeleccionadaTitular.clase);
+
+        // Llamada AJAX para emitir copia y obtener ID del trámite
+        fetch(`/api/licencias/emitirCopia?tipoDocumento=${tipoDocumento}&documento=${documento}&claseLicencia=${claseLicencia}`)
+          .then(response => response.json())
+          .then(data => {
+            const idTramite = data.idTramite;
+
+            // Abrir ventana con la copia de la licencia
+            const urlCopia = `/api/licencias/imprimirCopiaLicencia?tipoDocumento=${tipoDocumento}&documento=${documento}&claseLicencia=${claseLicencia}`;
+
+            // Abrir ventana con el comprobante, pasando el idTramite para mostrar el trámite correcto
+            const urlComprobante = `/api/licencias/comprobanteCopia?idTramite=${idTramite}`;
+
+            window.open(urlCopia, '_blank');
+            window.open(urlComprobante, '_blank');
+          })
+          .catch(error => {
+            console.error("Error al emitir copia:", error);
+            alert("Ocurrió un error al emitir la copia. Intente nuevamente.");
+          });
+      }
     }
 
     window.addEventListener("load", () => {

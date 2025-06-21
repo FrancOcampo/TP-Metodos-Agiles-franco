@@ -309,4 +309,31 @@ public class LicenciaServiceImpl implements LicenciaService {
         return licenciasRecord;
     }
 
+    @Override
+    public Licencia buscarLicenciaPorTitularyClase(Titular titular, String claseLicencia) {
+        return repository.findByTitularAndClase(titular, claseLicencia);
+    }
+
+    @Override
+    public Tramite emitirCopiaLicencia(Licencia licencia, Titular titular) {
+
+        int cantidadCopias = tramiteService.contarCopiasPorTitularYClase(titular, licencia.getClase());
+        String descripcion = switch (cantidadCopias) {
+            case 0 -> "Emisión de copia de licencia clase " + licencia.getClase() + ": duplicado";
+            case 1 -> "Emisión de copia de licencia clase " + licencia.getClase() + ": triplicado";
+            case 2 -> "Emisión de copia de licencia clase " + licencia.getClase() + ": cuadruplicado";
+            default -> "Emisión de copia de licencia clase " + licencia.getClase() + ": " + (cantidadCopias + 2) + "º copia";
+        };
+
+        //Registro del trámite
+        Tramite tramite = new Tramite();
+        tramite.setFecha(java.sql.Date.valueOf(java.time.LocalDate.now()));
+        tramite.setDescripcion(descripcion);
+        tramite.setCosto(50f);
+        tramite.setTitularAsociado(titular);
+        tramite.setUsuarioResponsable(usuarioService.buscarUsuarioPorId(1)); // POR AHORA 
+        tramite.setLicenciaAsociada(licencia);
+        return tramiteService.registrarTramite(tramite);
+    }
+
 }

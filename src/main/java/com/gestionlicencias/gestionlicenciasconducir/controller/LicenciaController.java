@@ -165,6 +165,56 @@ public class LicenciaController {
         return ResponseEntity.ok(licencias);
     }
 
+    @GetMapping("/emitirCopia")
+    @ResponseBody
+    public Map<String, Object> emitirCopiaLicencia(
+        @RequestParam("tipoDocumento") TipoDocumento tipoDocumento,
+        @RequestParam("documento") String documento,
+        @RequestParam("claseLicencia") String claseLicencia) {
+
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+        Licencia licencia = licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia);
+
+        Tramite tramiteCreado = licenciaService.emitirCopiaLicencia(licencia, titular);
+
+        // Devolver JSON con el ID del trámite
+        return Map.of("idTramite", tramiteCreado.getIdTramite(),
+                    "tipoDocumento", tipoDocumento,
+                    "documento", documento,
+                    "claseLicencia", claseLicencia);
+    }
+
+    @GetMapping("/imprimirCopia")
+    public String mostrarCopiaLicencia(
+        @RequestParam("tipoDocumento") TipoDocumento tipoDocumento,
+        @RequestParam("documento") String documento,
+        @RequestParam("claseLicencia") String claseLicencia,
+        Model model) {
+
+        // Buscar titular
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+        Licencia licencia = licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia);
+
+        model.addAttribute("titular", titular);
+        model.addAttribute("licencia", licencia);
+
+        return "impresionLicencia"; 
+    }
+
+    @GetMapping("/comprobanteCopia")
+    public String mostrarComprobanteCopia(
+        @RequestParam("idTramite") Integer idTramite,
+        Model model) {
+
+        Tramite tramite = tramiteService.buscarPorId(idTramite);
+
+        model.addAttribute("tramite", tramite);
+        model.addAttribute("titular", tramite.getTitularAsociado());
+        model.addAttribute("licencia", tramite.getLicenciaAsociada());
+
+        return "comprobanteTramite";
+    }
+
     @GetMapping
     public String mostrarMenu() {  
         return "menuLicencia";

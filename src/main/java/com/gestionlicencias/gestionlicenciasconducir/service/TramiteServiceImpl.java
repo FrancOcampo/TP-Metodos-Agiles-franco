@@ -25,4 +25,14 @@ public class TramiteServiceImpl implements TramiteService {
         return repository.findFirstByTitularAsociadoOrderByFechaDesc(titular);
     }
 
+    @Override
+        public int contarCopiasPorTitularYClase(Titular titular, String claseLicencia) {
+        return (int) repository.contarCopiasPorInicioTipoTramite(titular, claseLicencia, "Emisión de copia");
+    }
+
+    @Override
+    public Tramite buscarPorId(Integer id) {
+        return repository.findByIdTramite(id);
+    }
+
 }
