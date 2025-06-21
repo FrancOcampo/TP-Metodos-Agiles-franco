@@ -336,4 +336,46 @@ public class LicenciaServiceImpl implements LicenciaService {
         return tramiteService.registrarTramite(tramite);
     }
 
+    public Boolean sePuedeRenovar(Licencia licencia, Titular titular) {
+        if (licencia == null) return false;
+        if(licencia.getEstaVigente() == true && titular.getModificado() == false) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Tramite renovarLicencia(Licencia licencia) {
+        // Calcular años de vigencia según titular y clase de licencia
+        int aniosVigencia = calcularVigenciaLicencia(licencia.getTitular(), licencia.getClase());
+
+        int anioVencimiento = LocalDate.now().getYear() + aniosVigencia;
+
+        // Convertir fecha de nacimiento (Date) a LocalDate
+        LocalDate fechaNacimiento = ((java.sql.Date) licencia.getTitular().getFechaNacimiento()).toLocalDate();
+
+        // Crear la fecha de vencimiento con mismo mes y día que el nacimiento, pero en el año calculado
+        LocalDate fechaVencimiento = LocalDate.of(
+                anioVencimiento,
+                fechaNacimiento.getMonth(),
+                fechaNacimiento.getDayOfMonth()
+        );
+        
+        // Actualizar la fecha de vencimiento
+        licencia.setFechaVencimiento(java.sql.Date.valueOf(fechaVencimiento));
+        
+        // Guardar la licencia actualizada
+        repository.save(licencia);
+
+        //Registro del trámite
+        Tramite tramite = new Tramite();
+        tramite.setFecha(java.sql.Date.valueOf(java.time.LocalDate.now()));
+        tramite.setDescripcion("Renovación de licencia de conducir clase " + licencia.getClase());
+        tramite.setCosto(calcularCostoLicencia(licencia.getClase(), aniosVigencia));
+        tramite.setTitularAsociado(licencia.getTitular());
+        tramite.setUsuarioResponsable(usuarioService.buscarUsuarioPorId(1)); // POR AHORA 
+        tramite.setLicenciaAsociada(licencia);
+        return tramiteService.registrarTramite(tramite);
+    }
+
 }

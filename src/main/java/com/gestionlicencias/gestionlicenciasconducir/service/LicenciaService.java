@@ -15,4 +15,6 @@ public interface LicenciaService {
     List<LicenciaListadoRecord> buscarLicenciasNoVigentes(Date fechaDesde, Date fechaHasta, String clase);
     Licencia buscarLicenciaPorTitularyClase(Titular titular, String claseLicencia);
     Tramite emitirCopiaLicencia(Licencia licencia, Titular titular);
+    Boolean sePuedeRenovar(Licencia licencia, Titular titular);
+    Tramite renovarLicencia(Licencia licencia);
 }

@@ -248,7 +248,29 @@
         alert("Por favor, seleccione una licencia.");
         return;
       }
-      alert(`Renovar licencia de titular ${licenciaSeleccionadaTitular.titular.nombre}`);
+
+      const tipoDocumento = encodeURIComponent(licenciaSeleccionadaTitular.titular.tipoDocumento);
+      const documento = encodeURIComponent(licenciaSeleccionadaTitular.titular.documento);
+      const claseLicencia = encodeURIComponent(licenciaSeleccionadaTitular.clase);
+
+      // 1. Llamada para validar si se puede renovar
+      fetch(`/api/licencias/validarRenovacion?tipoDocumento=${tipoDocumento}&documento=${documento}&claseLicencia=${claseLicencia}`)
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => {
+              alert(data.message || "No se puede renovar esta licencia.");
+              throw new Error("Renovación no permitida");
+            });
+          }
+
+          // 2. Si pasa la validación, redirige al formulario de renovación
+          const motivo = encodeURIComponent("Cambio de datos del titular");
+          const url = `/api/licencias/renovacionLicencia?tipoDocumento=${tipoDocumento}&documento=${documento}&claseLicencia=${claseLicencia}&motivo=${motivo}`;
+          window.location.href = url;
+        })
+        .catch(error => {
+          console.error("Error al validar renovación:", error);
+        });
     }
 
     function emitirCopia() {

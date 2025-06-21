@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Licencia Controller", description = "Operaciones para la emisión de licencias")
 @Controller
@@ -215,8 +216,77 @@ public class LicenciaController {
         return "comprobanteTramite";
     }
 
+    @GetMapping("/validarRenovacion")
+    public ResponseEntity<?> validarRenovacion(
+        @RequestParam TipoDocumento tipoDocumento,
+        @RequestParam String documento,
+        @RequestParam String claseLicencia
+    ) {
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+        Licencia licencia = licenciaService.buscarLicenciaPorTitularyClase(titularService.buscarTitularDocumento(tipoDocumento, documento), claseLicencia);
+       
+        if (!licenciaService.sePuedeRenovar(licencia, titular)) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "message", "La licencia no está vencida ni hubo modificaciones en los datos del titular asociado. No se puede renovar."
+            ));
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/renovacionLicencia")
+    public String mostrarFormularioRenovacion(
+        @RequestParam TipoDocumento tipoDocumento,
+        @RequestParam String documento,
+        @RequestParam String claseLicencia,
+        @RequestParam String motivo,
+        Model model
+    ) {
+
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+        Licencia licencia = licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia);
+        if (licencia == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Licencia no encontrada");
+        }
+
+        model.addAttribute("licencia", licencia);
+        model.addAttribute("titular", licencia.getTitular());
+        model.addAttribute("motivoRenovacion", motivo);
+
+        return "renovacionLicencia";
+    }
+
+    @PostMapping("/renovar")
+    public ResponseEntity<?> renovarLicencia(
+        @RequestParam TipoDocumento tipoDocumento,
+        @RequestParam String documento,
+        @RequestParam String claseLicencia
+    ) {
+        Titular titular = titularService.buscarTitularDocumento(tipoDocumento, documento);
+        Licencia licencia = licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia);
+
+        if (licencia == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "Licencia no encontrada"));
+        }
+
+        try {
+            Tramite tramite = licenciaService.renovarLicencia(licencia);
+            titularService.actualizarModificaciones(licencia.getTitular());
+            return ResponseEntity.ok(Map.of(
+            "message", "Licencia renovada correctamente",
+            "idTramite", tramite.getIdTramite()
+        ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Error al renovar la licencia"));
+        }
+    }
+
     @GetMapping
     public String mostrarMenu() {  
         return "menuLicencia";
     }
+
+
 }

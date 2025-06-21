@@ -90,28 +90,23 @@
       <h2>Renovación de Licencia</h2>
 
       <div class="form-group">
-        <label>Nombre del titular</label>
-        <input type="text" th:value="${titular.nombre}" readonly>
-      </div>
-
-      <div class="form-group">
-        <label>Apellido del titular</label>
-        <input type="text" th:value="${titular.apellido}" readonly>
+        <label>Nombre y apellido del titular</label>
+        <input type="text" th:value="${titular.nombre + ' ' + titular.apellido}" readonly>
       </div>
 
       <div class="form-group">
         <label>Tipo de documento</label>
-        <input type="text" th:value="${titular.tipoDocumento}" readonly>
+        <input type="text" name="tipoDocumento" th:value="${titular.tipoDocumento}" readonly>
       </div>
 
       <div class="form-group">
         <label>Número de documento</label>
-        <input type="text" th:value="${titular.documento}" readonly>
+        <input type="text" name="documento" th:value="${titular.documento}" readonly>
       </div>
 
       <div class="form-group">
         <label>Clase de licencia</label>
-        <input type="text" th:value="${licencia.clase}" readonly>
+        <input type="text" name="claseLicencia" th:value="${licencia.clase}" readonly>
       </div>
 
       <div class="form-group">
@@ -136,22 +131,30 @@
         return;
       }
 
+      const tipoDocumento = document.querySelector('[name="tipoDocumento"]').value;
+      const documento = document.querySelector('[name="documento"]').value;
+      const claseLicencia = document.querySelector('[name="claseLicencia"]').value;
+
       try {
         const response = await fetch('/api/licencias/renovar', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tipoDocumento: document.querySelector('input[th\\:value="${titular.tipoDocumento}"]').value,
-            documento: document.querySelector('input[th\\:value="${titular.documento}"]').value
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({
+            tipoDocumento,
+            documento,
+            claseLicencia
           })
         });
 
         if (response.ok) {
-          alert("Licencia renovada exitosamente.");
-          location.reload();
+          const data = await response.json(); 
+          const idTramite = data.idTramite;
+          window.location.href = `/api/licencias/comprobanteCopia?idTramite=${idTramite}`;
         } else {
-          const data = await response.json();
-          alert("Error al renovar: " + (data.message || "Error desconocido."));
+          const errorData = await response.json();
+          alert("Error al renovar: " + (errorData.message || "Error desconocido."));
         }
       } catch (error) {
         alert("Error de red al intentar renovar.");

@@ -49,7 +49,11 @@ public class Titular{
     @OneToMany(mappedBy = "titular", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Licencia> licencias = new ArrayList<>();
 
+    @Column(name = "modificado")
+    private Boolean modificado;
+
     public Titular() {
+        modificado = false;
     }
 
     public Integer getIdTitular() {
@@ -130,6 +134,14 @@ public class Titular{
 
     public void setDonanteOrganos(Boolean donanteOrganos) {
         this.donanteOrganos = donanteOrganos;
+    }
+
+    public Boolean getModificado() {
+        return modificado;
+    }
+
+    public void setModificado(Boolean modificado) {
+        this.modificado = modificado;
     }
 
     public List<Licencia> getLicencias() {

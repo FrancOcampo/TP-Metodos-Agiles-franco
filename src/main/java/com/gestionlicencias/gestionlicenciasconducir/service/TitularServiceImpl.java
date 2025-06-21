@@ -95,8 +95,14 @@ public class TitularServiceImpl implements TitularService {
         titularExistente.setGrupoSanguineo(titularModificado.grupoSanguineo());
         titularExistente.setFactorRH(titularModificado.factorRH());
         titularExistente.setDonanteOrganos(titularModificado.donanteOrganos());
+        titularExistente.setModificado(true);
 
         repository.save(titularExistente);
+    }
+
+    public void actualizarModificaciones(Titular titular) {
+        titular.setModificado(false);
+        repository.save(titular);
     }
     
 }
