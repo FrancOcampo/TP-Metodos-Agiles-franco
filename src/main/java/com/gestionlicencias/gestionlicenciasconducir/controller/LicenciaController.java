@@ -185,7 +185,7 @@ public class LicenciaController {
                     "claseLicencia", claseLicencia);
     }
 
-    @GetMapping("/imprimirCopia")
+    @GetMapping("/imprimirCopiaLicencia")
     public String mostrarCopiaLicencia(
         @RequestParam("tipoDocumento") TipoDocumento tipoDocumento,
         @RequestParam("documento") String documento,
