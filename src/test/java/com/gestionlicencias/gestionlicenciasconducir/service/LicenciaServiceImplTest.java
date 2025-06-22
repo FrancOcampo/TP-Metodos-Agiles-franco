@@ -18,6 +18,7 @@ import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
+import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
 import com.gestionlicencias.gestionlicenciasconducir.repository.LicenciaRepository;
 
 class LicenciaServiceImplTest {
@@ -181,5 +182,31 @@ class LicenciaServiceImplTest {
         assertEquals(1, r.size());
         assertEquals("Mario", r.get(0).titular().nombre());
     }
+
+    @Test
+    void emitirCopiaLicencia_conTitularYLicenciaValida_registraTramiteCorrectamente() {
+        Titular titular = new Titular();
+        titular.setNombre("Juan");
+        titular.setApellido("Pérez");
+
+        Licencia licencia = new Licencia();
+        licencia.setClase("B");
+        licencia.setTitular(titular);
+
+        Tramite tramiteMock = new Tramite();
+        tramiteMock.setIdTramite(1);
+        tramiteMock.setDescripcion("Emisión de copia de licencia clase B: duplicado");
+
+        when(tramiteService.contarCopiasPorTitularYClase(titular, "B")).thenReturn(0);
+        when(usuarioService.buscarUsuarioPorId(1)).thenReturn(null); // Simulamos que devuelve null
+        when(tramiteService.registrarTramite(any(Tramite.class))).thenReturn(tramiteMock);
+
+        Tramite resultado = licenciaService.emitirCopiaLicencia(licencia, titular);
+
+        assertNotNull(resultado);
+        assertEquals("Emisión de copia de licencia clase B: duplicado", resultado.getDescripcion());
+        assertEquals(1, resultado.getIdTramite());
+    }
+
 
 } 
