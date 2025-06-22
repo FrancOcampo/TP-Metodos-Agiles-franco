@@ -42,7 +42,7 @@ class LicenciaControllerTest {
     }
 
     @Test
-    void emitirCopiaLicencia_Exito() throws Exception {
+    void emitirCopiaLicencia() throws Exception {
         TipoDocumento tipoDocumento = TipoDocumento.DNI;
         String documento = "12345678";
         String claseLicencia = "B";

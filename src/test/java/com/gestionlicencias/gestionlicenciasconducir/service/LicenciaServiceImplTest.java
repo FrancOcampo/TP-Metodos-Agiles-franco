@@ -184,7 +184,7 @@ class LicenciaServiceImplTest {
     }
 
     @Test
-    void emitirCopiaLicencia_conTitularYLicenciaValida_registraTramiteCorrectamente() {
+    void emitirCopiaLicencia_registraTramiteCorrectamente() {
         Titular titular = new Titular();
         titular.setNombre("Juan");
         titular.setApellido("Pérez");
