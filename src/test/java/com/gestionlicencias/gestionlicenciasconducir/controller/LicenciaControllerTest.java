@@ -74,6 +74,61 @@ class LicenciaControllerTest {
             .andExpect(jsonPath("$.claseLicencia").value(claseLicencia));
     }
 
+    @Test
+    void validarRenovacion_licenciaVigente_sinCambiosEnTitular_retornaBadRequest() throws Exception {
+        TipoDocumento tipoDocumento = TipoDocumento.DNI;
+        String documento = "12345678";
+        String claseLicencia = "B";
+
+        Titular titular = new Titular();
+        titular.setTipoDocumento(tipoDocumento);
+        titular.setDocumento(documento);
+        titular.setModificado(false); // No fue modificado
+
+        Licencia licencia = new Licencia();
+        licencia.setClase(claseLicencia);
+        licencia.setTitular(titular);
+        licencia.setEstaVigente(true); // Aún está vigente
+
+        when(titularService.buscarTitularDocumento(tipoDocumento, documento)).thenReturn(titular);
+        when(licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia)).thenReturn(licencia);
+        when(licenciaService.sePuedeRenovar(licencia, titular)).thenReturn(false);
+
+        mockMvc.perform(get("/api/licencias/validarRenovacion")
+                .param("tipoDocumento", tipoDocumento.name())
+                .param("documento", documento)
+                .param("claseLicencia", claseLicencia))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("La licencia no está vencida ni hubo modificaciones en los datos del titular asociado. No se puede renovar."));
+    }
+
+    @Test
+    void validarRenovacion_titularModificado_licenciaVigente_retornaOk() throws Exception {
+        TipoDocumento tipoDocumento = TipoDocumento.DNI;
+        String documento = "12345678";
+        String claseLicencia = "B";
+
+        Titular titular = new Titular();
+        titular.setTipoDocumento(tipoDocumento);
+        titular.setDocumento(documento);
+        titular.setModificado(true); // Fue modificado
+
+        Licencia licencia = new Licencia();
+        licencia.setClase(claseLicencia);
+        licencia.setTitular(titular);
+        licencia.setEstaVigente(true); // Sigue vigente, pero se permite renovar
+
+        when(titularService.buscarTitularDocumento(tipoDocumento, documento)).thenReturn(titular);
+        when(licenciaService.buscarLicenciaPorTitularyClase(titular, claseLicencia)).thenReturn(licencia);
+        when(licenciaService.sePuedeRenovar(licencia, titular)).thenReturn(true);
+
+        mockMvc.perform(get("/api/licencias/validarRenovacion")
+                .param("tipoDocumento", tipoDocumento.name())
+                .param("documento", documento)
+                .param("claseLicencia", claseLicencia))
+            .andExpect(status().isOk());
+    }
+
 }
 
 

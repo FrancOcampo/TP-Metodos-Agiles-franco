@@ -13,7 +13,7 @@ public class Usuario {
     @Column(name="nombre_usuario", nullable = false, length = 20)
     private String nombreUsuario;
 
-    @Column(name="contrasena", nullable = false, length = 20)
+    @Column(name="contrasena", nullable = false, length = 100)
     private String contrasena;
 
     @Column(name="rol", nullable = false, length = 30)

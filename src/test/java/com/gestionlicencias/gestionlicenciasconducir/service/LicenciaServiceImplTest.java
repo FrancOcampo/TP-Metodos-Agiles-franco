@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.http.MediaType;
 
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
@@ -207,6 +208,63 @@ class LicenciaServiceImplTest {
         assertEquals("Emisión de copia de licencia clase B: duplicado", resultado.getDescripcion());
         assertEquals(1, resultado.getIdTramite());
     }
+
+    @Test
+    void renovarLicencia_actualizaVigenciaYRegistraTramite() {
+        // Setup de titular y licencia vencida
+        Titular titular = new Titular();
+        titular.setNombre("Laura");
+        titular.setApellido("Sosa");
+        titular.setFechaNacimiento(Date.valueOf(LocalDate.of(1990, 6, 15)));
+
+        Licencia licencia = new Licencia();
+        licencia.setClase("B");
+        licencia.setTitular(titular);
+        licencia.setFechaVencimiento(Date.valueOf(LocalDate.of(2020, 6, 15)));
+
+        // Trámite esperado
+        Tramite tramiteMock = new Tramite();
+        tramiteMock.setIdTramite(123);
+        tramiteMock.setDescripcion("Renovación de licencia de conducir clase B");
+
+        // Mock comportamiento de usuario y trámite
+        when(usuarioService.buscarUsuarioPorId(1)).thenReturn(null); // no importa usuario por ahora
+        when(tramiteService.registrarTramite(any(Tramite.class))).thenReturn(tramiteMock);
+
+        // Ejecutar renovación
+        Tramite resultado = licenciaService.renovarLicencia(licencia);
+
+        // Verificaciones
+        assertNotNull(resultado);
+        assertEquals("Renovación de licencia de conducir clase B", resultado.getDescripcion());
+
+        // Validar que la licencia se haya actualizado con una nueva fecha
+        LocalDate vencimientoEsperado = LocalDate.of(
+            LocalDate.now().getYear() + 5,
+            6, 15 
+        );
+        assertEquals(Date.valueOf(vencimientoEsperado), licencia.getFechaVencimiento());
+    }
+
+    @Test
+    void sePuedeRenovar_licenciaVigente_titularNoModificado_retornaFalse() {
+        // Arrange
+        Titular titular = new Titular();
+        titular.setModificado(false); // No hubo cambios en los datos del titular
+
+        Licencia licencia = new Licencia();
+        licencia.setEstaVigente(true); // La licencia sigue vigente
+        licencia.setTitular(titular);
+
+        // Act
+        boolean resultado = licenciaService.sePuedeRenovar(licencia, titular);
+
+        // Assert
+        assertFalse(resultado, "No debe poder renovarse si la licencia está vigente y el titular no fue modificado");
+    }
+
+
+    
 
 
 } 
