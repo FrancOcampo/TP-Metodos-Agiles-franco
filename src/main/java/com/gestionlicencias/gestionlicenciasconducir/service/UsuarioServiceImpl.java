@@ -1,7 +1,7 @@
 package com.gestionlicencias.gestionlicenciasconducir.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gestionlicencias.gestionlicenciasconducir.dto.UsuarioRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Usuario;
@@ -11,10 +11,10 @@ import com.gestionlicencias.gestionlicenciasconducir.repository.UsuarioRepositor
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository repository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.repository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
