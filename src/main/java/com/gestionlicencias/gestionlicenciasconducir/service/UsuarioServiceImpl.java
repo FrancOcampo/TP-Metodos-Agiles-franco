@@ -32,9 +32,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         Usuario usuario = new Usuario();
         usuario.setNombreUsuario(usuarioRecord.nombreUsuario());
+        usuario.setTipoDocumento(usuarioRecord.tipoDocumento());
+        usuario.setDocumento(usuarioRecord.documento());
+        usuario.setApellido(usuarioRecord.apellido());
+        usuario.setNombre(usuarioRecord.nombre());
         usuario.setContrasena(passwordEncoder.encode(usuarioRecord.contrasena()));
         usuario.setRol("Administrativo"); 
 
         repository.save(usuario);
     }
 }
+
+

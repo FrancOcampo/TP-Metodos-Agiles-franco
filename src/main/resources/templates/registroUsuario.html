@@ -41,9 +41,17 @@
       font-weight: 700;
     }
     .form-group {
-      margin-bottom: 18px;
       display: flex;
       flex-direction: column;
+      margin-bottom: 18px;
+    }
+    .form-group label[for]::after {
+      content: '';
+    }
+    .form-group label[for].invalid::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
     }
     label {
       font-weight: bold;
@@ -72,6 +80,13 @@
       margin-top: 4px;
       display: none;
     }
+    select {
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fdfdfd;
+    }
     .btn {
       display: block;
       margin: 30px auto 0;
@@ -98,6 +113,39 @@
   <div class="form-card">
     <form id="altaUsuarioForm" onsubmit="return enviarFormularioUsuario(event)" novalidate>
       <h2>Registrar usuario</h2>
+
+        <div class="row">
+    <div class="form-group">
+      <label for="tipoDocumento" class="invalid">Tipo de documento</label>
+      <select id="tipoDocumento" name="tipoDocumento" required>
+        <option value="">Seleccione...</option>
+        <th:block th:each="tipo : ${T(com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento).values()}">
+          <option th:value="${tipo}" th:text="${tipo}"></option>
+        </th:block>
+      </select>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="documento" class="invalid">Número de documento</label>
+      <input type="text" id="documento" name="documento" maxlength="8" required>
+      <div class="error-message">Este campo es obligatorio.</div>
+    </div>
+  </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label for="apellido" class="invalid">Apellido/s</label>
+        <input type="text" id="apellido" name="apellido" maxlength="50" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="nombre" class="invalid">Nombre/s</label>
+        <input type="text" id="nombre" name="nombre" maxlength="50" required>
+        <div class="error-message">Este campo es obligatorio.</div>
+      </div>
+    </div>
 
       <div class="form-group">
         <label for="nombreUsuario" class="invalid">Nombre de usuario</label>
@@ -141,10 +189,14 @@
 
       if (!validarFormularioUsuario()) return false;
 
-      const data = {
-        nombreUsuario: document.getElementById('nombreUsuario').value.trim(),
-        contrasena: document.getElementById('contrasena').value
-      };
+    const data = {
+      nombreUsuario: document.getElementById('nombreUsuario').value.trim(),
+      contrasena: document.getElementById('contrasena').value,
+      apellido: document.getElementById('apellido').value.trim(),
+      nombre: document.getElementById('nombre').value.trim(),
+      documento: document.getElementById('documento').value.trim(),
+      tipoDocumento: document.getElementById('tipoDocumento').value.trim()
+    };
 
       try {
         const response = await fetch('/api/usuarios/registrar', {
@@ -174,37 +226,182 @@
       }
     }
 
-    function validarFormularioUsuario() {
-      const nombreUsuario = document.getElementById('nombreUsuario');
-      const contrasena = document.getElementById('contrasena');
-      let valido = true;
+  function validarFormularioUsuario() {
+    const nombreUsuario = document.getElementById('nombreUsuario');
+    const contrasena = document.getElementById('contrasena');
+    const tipoDocumento = document.getElementById('tipoDocumento');
+    const documento = document.getElementById('documento');
+    const nombre = document.getElementById('nombre');
+    const apellido = document.getElementById('apellido');
+    let tieneCamposVacios = false;
+    let valido = true;
 
-      if (nombreUsuario.value.trim() === '' || contrasena.value.trim() === '') {
-        alert('Por favor, complete todos los campos obligatorios.');
-        if (nombreUsuario.value.trim() === '') mostrarErrorCampo(nombreUsuario, 'error-nombreUsuario', 'El nombre de usuario es obligatorio.');
-        if (contrasena.value.trim() === '') mostrarErrorCampo(contrasena, 'error-contrasena', 'La contraseña es obligatoria.');
-        return false;
+    // Limpiar errores previos de campos que usan mensaje debajo
+    const camposConMensaje = [tipoDocumento, documento, nombre, apellido];
+    camposConMensaje.forEach(campo => {
+      const label = campo.parentElement.querySelector('label');
+      const errorMsg = campo.parentElement.querySelector('.error-message');
+      if (label) label.classList.remove('invalid');
+      if (errorMsg) {
+        errorMsg.textContent = '';
+        errorMsg.style.display = 'none';
+      }
+      campo.classList.remove('input-error');
+    });
+
+    // Verificar campos obligatorios
+    if (
+      nombreUsuario.value.trim() === '' ||
+      contrasena.value.trim() === '' ||
+      tipoDocumento.value.trim() === '' ||
+      documento.value.trim() === '' ||
+      nombre.value.trim() === '' ||
+      apellido.value.trim() === ''
+    ) {
+      tieneCamposVacios = true;
+      if (tipoDocumento.value.trim() === '') {
+        const label = tipoDocumento.parentElement.querySelector('label');
+        const errorMsg = tipoDocumento.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'Este campo es obligatorio.';
+          errorMsg.style.display = 'block';
+        }
+        tipoDocumento.classList.add('input-error');
       }
 
-      limpiarErrores();
+      if (documento.value.trim() === '') {
+        const label = documento.parentElement.querySelector('label');
+        const errorMsg = documento.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'Este campo es obligatorio.';
+          errorMsg.style.display = 'block';
+        }
+        documento.classList.add('input-error');
+      }
 
+      if (nombre.value.trim() === '') {
+        const label = nombre.parentElement.querySelector('label');
+        const errorMsg = nombre.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'Este campo es obligatorio.';
+          errorMsg.style.display = 'block';
+        }
+        nombre.classList.add('input-error');
+      }
+
+      if (apellido.value.trim() === '') {
+        const label = apellido.parentElement.querySelector('label');
+        const errorMsg = apellido.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'Este campo es obligatorio.';
+          errorMsg.style.display = 'block';
+        }
+        apellido.classList.add('input-error');
+      }
+
+      if (nombreUsuario.value.trim() === '') {
+        mostrarErrorCampo(nombreUsuario, 'error-nombreUsuario', 'Este campo es obligatorio.');
+      }
+
+      if (contrasena.value.trim() === '') {
+        mostrarErrorCampo(contrasena, 'error-contrasena', 'Este campo es obligatorio.');
+      }
+
+      valido = false;
+    }
+
+    const textoRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+    if (nombre.value.trim() !== '') {
+      if (!textoRegex.test(nombre.value.trim()) || nombre.value.trim().length > 50) {
+        const label = nombre.parentElement.querySelector('label');
+        const errorMsg = nombre.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'El nombre sólo puede contener letras y espacios, máximo 50 caracteres.';
+          errorMsg.style.display = 'block';
+        }
+        nombre.classList.add('input-error');
+        valido = false;
+      }
+    }
+
+    if (apellido.value.trim() !== '') {
+      if (!textoRegex.test(apellido.value.trim()) || apellido.value.trim().length > 50) {
+        const label = apellido.parentElement.querySelector('label');
+        const errorMsg = apellido.parentElement.querySelector('.error-message');
+        if (label) label.classList.add('invalid');
+        if (errorMsg) {
+          errorMsg.textContent = 'El apellido sólo puede contener letras y espacios, máximo 50 caracteres.';
+          errorMsg.style.display = 'block';
+        }
+        apellido.classList.add('input-error');
+        valido = false;
+      }
+    }
+
+    const doc = documento.value.trim();
+    const labelDocumento = documento.parentElement.querySelector('label');
+    const errorMsgDocumento = documento.parentElement.querySelector('.error-message');
+
+    documento.classList.remove('input-error');
+    if (errorMsgDocumento) errorMsgDocumento.style.display = 'none';
+    if (labelDocumento) labelDocumento.classList.remove('invalid');
+
+    if(doc == '') {
+      if (errorMsgDocumento) errorMsgDocumento.textContent = 'Este campo es obligatorio.';
+      if (errorMsgDocumento) errorMsgDocumento.style.display = 'block';
+      documento.classList.add('input-error');
+    }
+    else if (doc.length !== 8) {
+        if (errorMsgDocumento) errorMsgDocumento.textContent = 'El número de documento debe tener exactamente 8 caracteres.';
+        if (errorMsgDocumento) errorMsgDocumento.style.display = 'block';
+        documento.classList.add('input-error');
+        if (labelDocumento) labelDocumento.classList.add('invalid');
+        valido = false;
+      } else if (tipoDocumento.value === 'DNI' && !/^\d{8}$/.test(doc)) {
+        if (errorMsgDocumento) errorMsgDocumento.textContent = 'El DNI debe contener exactamente 8 dígitos numéricos.';
+        if (errorMsgDocumento) errorMsgDocumento.style.display = 'block';
+        documento.classList.add('input-error');
+        if (labelDocumento) labelDocumento.classList.add('invalid');
+        valido = false;
+      } else if (tipoDocumento.value !== 'DNI' && !/^[A-Za-z0-9]{8}$/.test(doc)) {
+        if (errorMsgDocumento) errorMsgDocumento.textContent = 'El documento debe tener 8 caracteres alfanuméricos.';
+        if (errorMsgDocumento) errorMsgDocumento.style.display = 'block';
+        documento.classList.add('input-error');
+        if (labelDocumento) labelDocumento.classList.add('invalid');
+        valido = false;
+      }
+
+    if (nombreUsuario.value.trim() !== '') {
       if (!/^[A-Za-z0-9]+$/.test(nombreUsuario.value)) {
         mostrarErrorCampo(nombreUsuario, 'error-nombreUsuario', 'El nombre de usuario sólo puede contener letras y números.');
         valido = false;
       }
-
-      if (contrasena.value.length < 6) {
-        mostrarErrorCampo(contrasena, 'error-contrasena', 'La contraseña debe tener al menos 6 caracteres.');
-        valido = false;
-      } else if (!/^[A-Za-z0-9]+$/.test(contrasena.value)) {
-        mostrarErrorCampo(contrasena, 'error-contrasena', 'La contraseña sólo puede contener letras y números.');
-        valido = false;
-      }
-
-      if (!valido) return false;
-
-      return confirm('¿Está seguro de que desea registrar este usuario?');
     }
+
+    if (contrasena.value.length > 0 && contrasena.value.length < 6) {
+      mostrarErrorCampo(contrasena, 'error-contrasena', 'La contraseña debe tener al menos 6 caracteres.');
+      valido = false;
+    } else if (!/^[A-Za-z0-9]+$/.test(contrasena.value) && contrasena.value.length > 0) {
+      mostrarErrorCampo(contrasena, 'error-contrasena', 'La contraseña sólo puede contener letras y números.');
+      valido = false;
+    }
+
+    if (tieneCamposVacios) {
+        alert('Por favor, complete todos los campos obligatorios.');
+        return false;
+    }
+
+    if (!valido) return false;
+
+    return confirm('¿Está seguro de que desea registrar este usuario?');
+  }
+
 
   </script>
 </body>
