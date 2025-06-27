@@ -16,7 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.List;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioControllerTest {
@@ -69,5 +72,28 @@ class UsuarioControllerTest {
                         .content(objectMapper.writeValueAsString(usuarioRecord)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("El nombre de usuario ya está registrado."));
+    }
+
+    @Test
+    void buscarUsuario_exitoso() throws Exception {
+        UsuarioRecord usuario1 = new UsuarioRecord("admin", TipoDocumento.DNI, "12345678", "Perez", "Juan", "clave123");
+        UsuarioRecord usuario2 = new UsuarioRecord("ana01", TipoDocumento.DNI, "87654321", "Gomez", "Ana", "clave456");
+        when(usuarioService.buscarUsuario(null, null, null)).thenReturn(List.of(usuario1, usuario2));
+
+        mockMvc.perform(get("/api/usuarios/buscar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombreUsuario").value("admin"))
+                .andExpect(jsonPath("$[1].nombreUsuario").value("ana01"));
+    }
+
+    @Test
+    void buscarUsuario_sinResultados() throws Exception {
+        when(usuarioService.buscarUsuario(TipoDocumento.DNI, "99999999", null)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/usuarios/buscar")
+                .param("tipoDocumento", "DNI")
+                .param("documento", "99999999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }
