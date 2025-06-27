@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.MediaType;
 
 import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaRecord;
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaListadoRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.Licencia;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
 import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
@@ -263,8 +264,47 @@ class LicenciaServiceImplTest {
         assertFalse(resultado, "No debe poder renovarse si la licencia está vigente y el titular no fue modificado");
     }
 
+    @Test
+    void buscarLicenciasNoVigentes_filtraPorFechasYClase() {
+        // Arrange
+        Titular titular = new Titular();
+        titular.setNombre("Juan");
+        titular.setApellido("Pérez");
+        Licencia l1 = new Licencia();
+        l1.setTitular(titular);
+        l1.setIdLicencia(1);
+        l1.setClase("A");
+        l1.setFechaVencimiento(java.sql.Date.valueOf("2024-01-10"));
+        Licencia l2 = new Licencia();
+        l2.setTitular(titular);
+        l2.setIdLicencia(2);
+        l2.setClase("B");
+        l2.setFechaVencimiento(java.sql.Date.valueOf("2024-03-15"));
+        Licencia l3 = new Licencia();
+        l3.setTitular(titular);
+        l3.setIdLicencia(3);
+        l3.setClase("A");
+        l3.setFechaVencimiento(java.sql.Date.valueOf("2025-01-10")); // fuera de rango
 
-    
+        // Solo l1 y l2 deben ser devueltas por el mock
+        when(licenciaRepository.findLicenciasNoVigentes(any(Date.class), any())).thenReturn(List.of(l1, l2, l3));
 
+        Date desde = java.sql.Date.valueOf("2024-01-01");
+        Date hasta = java.sql.Date.valueOf("2024-12-31");
 
-} 
+        // Act
+        List<LicenciaListadoRecord> resultado = licenciaService.buscarLicenciasNoVigentes(desde, hasta, null);
+
+        // Assert
+        assertEquals(2, resultado.size());
+        assertTrue(resultado.stream().anyMatch(r -> r.numeroLicencia() == 1));
+        assertTrue(resultado.stream().anyMatch(r -> r.numeroLicencia() == 2));
+        assertEquals("No vigente", resultado.get(0).estadoActual());
+        assertEquals("Juan Pérez", resultado.get(0).nombreCompletoTitular());
+
+        // Filtrar por clase
+        List<LicenciaListadoRecord> soloClaseA = licenciaService.buscarLicenciasNoVigentes(desde, hasta, "A");
+        assertEquals(2, soloClaseA.size()); // El mock devuelve l1 y l3, pero solo l1 está en rango
+        assertTrue(soloClaseA.stream().anyMatch(r -> r.numeroLicencia() == 1));
+    }
+}

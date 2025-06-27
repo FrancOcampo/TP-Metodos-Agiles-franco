@@ -9,6 +9,7 @@ import com.gestionlicencias.gestionlicenciasconducir.model.Tramite;
 import com.gestionlicencias.gestionlicenciasconducir.service.LicenciaServiceImpl;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularServiceImpl;
 import com.gestionlicencias.gestionlicenciasconducir.service.TramiteServiceImpl;
+import com.gestionlicencias.gestionlicenciasconducir.dto.LicenciaListadoRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class LicenciaControllerTest {
@@ -127,6 +130,27 @@ class LicenciaControllerTest {
                 .param("documento", documento)
                 .param("claseLicencia", claseLicencia))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void mostrarLicenciasNoVigentes_devuelveListaFiltrada() throws Exception {
+        // Arrange
+        LicenciaListadoRecord l1 = new LicenciaListadoRecord("Juan Pérez", 1, "A", "No vigente", java.sql.Date.valueOf("2024-01-10"));
+        LicenciaListadoRecord l2 = new LicenciaListadoRecord("Ana Gómez", 2, "B", "No vigente", java.sql.Date.valueOf("2024-03-15"));
+        List<LicenciaListadoRecord> mockList = List.of(l1, l2);
+
+        when(licenciaService.buscarLicenciasNoVigentes(null, null, null)).thenReturn(mockList);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/licencias/noVigentes")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].nombreCompletoTitular").value("Juan Pérez"))
+            .andExpect(jsonPath("$[0].numeroLicencia").value(1))
+            .andExpect(jsonPath("$[0].clase").value("A"))
+            .andExpect(jsonPath("$[1].nombreCompletoTitular").value("Ana Gómez"))
+            .andExpect(jsonPath("$[1].numeroLicencia").value(2))
+            .andExpect(jsonPath("$[1].clase").value("B"));
     }
 
 }
