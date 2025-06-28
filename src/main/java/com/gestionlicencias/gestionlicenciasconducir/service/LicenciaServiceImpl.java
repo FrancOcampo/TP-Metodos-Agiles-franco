@@ -298,7 +298,8 @@ public class LicenciaServiceImpl implements LicenciaService {
         for(Licencia l : filtradas) {
             LicenciaListadoRecord lr = new LicenciaListadoRecord(
                 l.getTitular().getNombre() + " " + l.getTitular().getApellido(), 
-                l.getIdLicencia(), 
+                l.getTitular().getTipoDocumento(),
+                l.getTitular().getDocumento(),
                 l.getClase(), 
                 "No vigente",
                 l.getFechaVencimiento()
