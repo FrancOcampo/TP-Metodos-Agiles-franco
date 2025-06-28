@@ -135,8 +135,8 @@ class LicenciaControllerTest {
     @Test
     void mostrarLicenciasNoVigentes_devuelveListaFiltrada() throws Exception {
         // Arrange
-        LicenciaListadoRecord l1 = new LicenciaListadoRecord("Juan Pérez", 1, "A", "No vigente", java.sql.Date.valueOf("2024-01-10"));
-        LicenciaListadoRecord l2 = new LicenciaListadoRecord("Ana Gómez", 2, "B", "No vigente", java.sql.Date.valueOf("2024-03-15"));
+        LicenciaListadoRecord l1 = new LicenciaListadoRecord("Juan Pérez", TipoDocumento.DNI, "12345678", "A", "No vigente", java.sql.Date.valueOf("2024-01-10"));
+        LicenciaListadoRecord l2 = new LicenciaListadoRecord("Ana Gómez", TipoDocumento.DNI, "33239454","B", "No vigente", java.sql.Date.valueOf("2024-03-15"));
         List<LicenciaListadoRecord> mockList = List.of(l1, l2);
 
         when(licenciaService.buscarLicenciasNoVigentes(null, null, null)).thenReturn(mockList);
@@ -146,10 +146,8 @@ class LicenciaControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].nombreCompletoTitular").value("Juan Pérez"))
-            .andExpect(jsonPath("$[0].numeroLicencia").value(1))
             .andExpect(jsonPath("$[0].clase").value("A"))
             .andExpect(jsonPath("$[1].nombreCompletoTitular").value("Ana Gómez"))
-            .andExpect(jsonPath("$[1].numeroLicencia").value(2))
             .andExpect(jsonPath("$[1].clase").value("B"));
     }
 

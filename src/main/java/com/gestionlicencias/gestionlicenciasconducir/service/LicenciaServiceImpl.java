@@ -290,7 +290,7 @@ public class LicenciaServiceImpl implements LicenciaService {
          * SOLUCIÓN PROVISORIA: Tuve inconvenientes con la consulta de JPA
          * que no filtraba correctamente por fecha de vencimiento.
          * Habría que revisar la consulta para que funcione correctamente.
-         * Por ahora, filtramos por fechas en memoria (esto es muy inficiente
+         * Por ahora, filtramos por fechas en memoria (esto es muy ineficiente
          * si hay muchas licencias, pero es una solución provisoria).
         */
         List<Licencia> filtradas = buscarLicenciasPorFechas(fechaDesde, fechaHasta, licencias);
