@@ -6,7 +6,9 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.gestionlicencias.gestionlicenciasconducir.dto.UsuarioRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
+import com.gestionlicencias.gestionlicenciasconducir.model.Usuario;
 import com.gestionlicencias.gestionlicenciasconducir.service.UsuarioService;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -111,6 +114,36 @@ public class UsuarioController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("message", "Ocurrió un error al modificar el usuario"));
         }
+    }
+
+    @GetMapping("/buscarUsuarios")
+    public String mostrarBusquedaUsuarios() {
+        return "listaUsuarios"; 
+    }
+
+    @Operation(
+    summary = "Obtener usuario por tipo y documento",
+    description = "Devuelve un usuario según tipo de documento y número de documento",
+    responses = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Parámetros inválidos"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    }
+)
+    @GetMapping("/modificar/{tipoDocumento}/{documento}/{nombreUsuario}")
+    public String mostrarFormularioModificacion(
+            @PathVariable TipoDocumento tipoDocumento,
+            @PathVariable String documento,
+            @PathVariable String nombreUsuario,
+            Model model) {
+
+        List<UsuarioRecord> usuarios = usuarioService.buscarUsuario(tipoDocumento, documento, nombreUsuario);
+        model.addAttribute("usuario", usuarios.get(0));
+        
+        model.addAttribute("tiposDocumento", TipoDocumento.values());
+
+        return "modificacionUsuario"; 
     }
 
 }

@@ -73,7 +73,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setDocumento(usuarioRecord.documento());
         usuario.setApellido(usuarioRecord.apellido());
         usuario.setNombre(usuarioRecord.nombre());
-        usuario.setContrasena(passwordEncoder.encode(usuarioRecord.contrasena()));
+        if (usuarioRecord.contrasena() != null && !usuarioRecord.contrasena().isBlank()) {
+            usuario.setContrasena(passwordEncoder.encode(usuarioRecord.contrasena()));
+        }
 
         repository.save(usuario);
     }
