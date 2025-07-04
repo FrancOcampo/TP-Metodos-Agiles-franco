@@ -22,6 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Tag(name = "Usuario Controller", description = "Operaciones para la gestión de usuarios")
 @Controller
@@ -55,11 +59,55 @@ public class UsuarioController {
         return "registroUsuario";
     }
 
+    //Login
     @GetMapping("/login") 
     String mostrarLogin() {
         return "login";
     }
 
+    @Operation(
+        summary = "Login de Usuario",
+        description = "Permite a un usuario iniciar sesión con su nombre de usuario y contraseña.",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login exitoso"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    @PostMapping("/loginInput")
+    public String loginUsuario(
+            @RequestParam String username,
+            @RequestParam String password,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            String token = usuarioService.loginDeUsuario(username, password);
+            String rol = Jwts.parser()
+                    .setSigningKey(JWT_SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("rol", String.class);
+
+            return "root".equals(rol)
+                    ? "redirect:/api/usuarios/Administrador"
+                    : "redirect:/api/usuarios/Administrativo";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addAttribute("error", "true");
+            return "redirect:/api/usuarios/login";
+        }
+    }
+    @GetMapping("/Administrador")
+    public String mostrarMenuOpcionesUsuarioAdministrador() {
+        return "Administrador"; // Return the name of the Thymeleaf template
+    }
+
+    @GetMapping("/Administrativo")
+    public String mostrarMenuOpcionesUsuarioAdministrativo() {
+        return "menuOpcionesUsuarioAdministrativo"; // Return the name of the Thymeleaf template
+    }
+
+    //------------------Fin de login------------------//
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioRecord usuarioRecord) {
         try {

@@ -119,7 +119,7 @@
   </div>
 
   <div class="form-card">
-    <form th:action="@{/login}" method="post">
+    <form th:action="@{/api/usuarios/loginInput}" method="post">
       <h2>Iniciar sesión</h2>
 
       <div th:if="${param.error}" class="alert-error">

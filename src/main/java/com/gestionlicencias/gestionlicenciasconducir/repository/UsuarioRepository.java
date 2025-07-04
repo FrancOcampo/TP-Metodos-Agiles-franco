@@ -12,6 +12,7 @@ import com.gestionlicencias.gestionlicenciasconducir.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Usuario findByIdUsuario(Integer idUsuario);
+    Usuario findByNombreUsuario(String nombreUsuario);
     boolean existsByNombreUsuario(String nombreUsuario);
     Usuario findByTipoDocumentoAndDocumento(TipoDocumento tipoDocumento, String documento);
 

@@ -12,4 +12,5 @@ public interface UsuarioService {
     public void registrarUsuario(UsuarioRecord usuarioRecord);
     public List<UsuarioRecord> buscarUsuario(TipoDocumento tipoDocumento, String documento, String nombreUsuario);
     public void modificarUsuario(UsuarioRecord usuarioRecord);
+    public String loginDeUsuario(String username, String password);
 }
