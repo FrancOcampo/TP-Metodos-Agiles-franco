@@ -26,17 +26,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import javax.crypto.SecretKey;
 
 @Tag(name = "Usuario Controller", description = "Operaciones para la gestión de usuarios")
 @Controller
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-
     private final UsuarioService usuarioService;
+    private final SecretKey jwtSecretKey;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, SecretKey jwtSecretKey) {
         this.usuarioService = usuarioService;
+        this.jwtSecretKey = jwtSecretKey;
     }
     
     @GetMapping("/menuOpcionesAdministrativo") 
@@ -84,7 +86,7 @@ public class UsuarioController {
         try {
             String token = usuarioService.loginDeUsuario(username, password);
             String rol = Jwts.parser()
-                    .setSigningKey(JWT_SECRET_KEY)
+                    .setSigningKey(jwtSecretKey)
                     .parseClaimsJws(token)
                     .getBody()
                     .get("rol", String.class);
@@ -99,7 +101,7 @@ public class UsuarioController {
     }
     @GetMapping("/Administrador")
     public String mostrarMenuOpcionesUsuarioAdministrador() {
-        return "Administrador"; // Return the name of the Thymeleaf template
+        return "menuOpcionesUsuarioAdministrador"; // Return the name of the Thymeleaf template
     }
 
     @GetMapping("/Administrativo")

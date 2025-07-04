@@ -3,6 +3,7 @@ package com.gestionlicencias.gestionlicenciasconducir.service;
 import java.util.Date;
 import java.util.List;
 
+import com.gestionlicencias.gestionlicenciasconducir.config.SeguridadConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ import com.gestionlicencias.gestionlicenciasconducir.model.Usuario;
 import com.gestionlicencias.gestionlicenciasconducir.repository.UsuarioRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import javax.crypto.SecretKey;
+
+import javax.crypto.SecretKey;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -21,10 +25,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final SecretKey jwtSecretKey;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, SeguridadConfig seguridadConfig) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, SecretKey jwtSecretKey) {
         this.repository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtSecretKey = seguridadConfig.getJwtSecretKey();
+        this.jwtSecretKey = jwtSecretKey;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public String loginDeUsuario(String username, String password) {
 
-        if ("root".equals(username) && "root".equals(password)) {
+        /*if ("root".equals(username) && "root".equals(password)) {
             String token = Jwts.builder()
                     .setSubject("root")
                     .claim("rol", "root")
@@ -99,7 +103,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                     .compact();
 
             return token;
-        }
+        }*/
 
         // Retrieve the user by username
         Usuario usuario = repository.findByNombreUsuario(username);

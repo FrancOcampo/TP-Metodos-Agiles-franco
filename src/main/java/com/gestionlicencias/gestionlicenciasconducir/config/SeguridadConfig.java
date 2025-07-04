@@ -15,6 +15,7 @@ public class SeguridadConfig {
     // En algún lugar centralizado (por ejemplo, en tu clase |de configuración):
     private static final SecretKey JWT_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
+    @Bean
     public SecretKey getJwtSecretKey() {
         return JWT_SECRET_KEY;
     }
