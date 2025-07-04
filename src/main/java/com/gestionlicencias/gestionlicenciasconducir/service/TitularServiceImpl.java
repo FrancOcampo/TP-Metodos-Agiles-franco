@@ -104,5 +104,23 @@ public class TitularServiceImpl implements TitularService {
         titular.setModificado(false);
         repository.save(titular);
     }
+
+    @Override
+    public List<Titular> buscarTitulares(String apellido, TipoDocumento tipoDocumento, String documento) {
+        List<Titular> todos = repository.findAll();
+
+        return todos.stream()
+            .filter(t -> {
+                boolean coincideApellido = (apellido == null || apellido.isBlank()) ||
+                        t.getApellido().toLowerCase().contains(apellido.toLowerCase());
+                boolean coincideTipoDoc = (tipoDocumento == null) ||
+                        tipoDocumento.equals(t.getTipoDocumento());
+                boolean coincideDocumento = (documento == null || documento.isBlank()) ||
+                        documento.equals(t.getDocumento());
+                return coincideApellido && coincideTipoDoc && coincideDocumento;
+            })
+            .toList();
+    }
+
     
 }

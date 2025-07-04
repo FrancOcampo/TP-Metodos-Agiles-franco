@@ -1,14 +1,20 @@
 package com.gestionlicencias.gestionlicenciasconducir.controller;
 
 import com.gestionlicencias.gestionlicenciasconducir.mapper.TitularMapper;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.gestionlicencias.gestionlicenciasconducir.service.TitularService;
 import com.gestionlicencias.gestionlicenciasconducir.dto.TitularRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
+import com.gestionlicencias.gestionlicenciasconducir.model.Titular;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -70,6 +76,27 @@ public class TitularController {
         }
     }
 
+    @GetMapping("/modificar/{tipoDocumento}/{documento}")
+    public String mostrarFormularioModificar(
+            @PathVariable TipoDocumento tipoDocumento,
+            @PathVariable String documento,
+            Model model) {
+
+        try {
+            Titular titular = service.buscarTitularDocumento(tipoDocumento, documento);
+            if (titular == null) {
+                throw new EntityNotFoundException("Titular no encontrado");
+            }
+            model.addAttribute("titular", titular);
+            return "modificacionTitular"; 
+
+        } catch (EntityNotFoundException e) {
+            return "error/404"; 
+        } catch (Exception e) {
+            return "error/500";
+        }
+    }
+
    @PutMapping("/modificar/{tipoDocumento}/{documento}")
     public ResponseEntity<Void> modificarTitular(
             @PathVariable TipoDocumento tipoDocumento,
@@ -79,11 +106,37 @@ public class TitularController {
         try {
             service.actualizarTitular(tipoDocumento, documento, titularModificado);
             return ResponseEntity.noContent().build();
+
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping(value = "/lista", produces = "application/json")
+    @ResponseBody
+    @Operation(summary   = "Listar / Buscar Titulares",
+            description = "Lista todos los titulares o filtra por apellido, tipoDocumento y/o documento",
+            responses = {
+                @ApiResponse(responseCode = "200", description = "Lista obtenida"),
+                @ApiResponse(responseCode = "500", description = "Error interno")
+            })
+    public ResponseEntity<List<TitularRecord>> listarOBuscarTitulares(
+            @RequestParam(required = false) String apellido,
+            @RequestParam(required = false) TipoDocumento tipoDocumento,
+            @RequestParam(required = false) String documento) {
+
+        List<TitularRecord> resultado = service.buscarTitulares(apellido, tipoDocumento, documento)
+                                            .stream()
+                                            .map(titularMapper::toRecord)
+                                            .toList();
+
+        return ResponseEntity.ok(resultado);
     }
 
     //Endpoints para el front
@@ -102,6 +155,6 @@ public class TitularController {
 
     //listar
     @GetMapping("/buscarTitulares")
-    public String mostrarFormularioListar() {   return "listarTitular";    }
+    public String mostrarFormularioListar() {   return "listaTitulares";    }
 
 }

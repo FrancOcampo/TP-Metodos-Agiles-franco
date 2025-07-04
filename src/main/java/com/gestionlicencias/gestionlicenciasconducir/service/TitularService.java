@@ -12,4 +12,5 @@ public interface TitularService {
     TitularRecord buscarTitular(TipoDocumento tipoDocumento, String documento);
     Titular buscarTitularDocumento(TipoDocumento tipoDocumento, String documento);
     void actualizarTitular(TipoDocumento tipoDocumento, String documento, TitularRecord titularModificado);
+    List<Titular> buscarTitulares(String apellido, TipoDocumento tipoDocumento, String documento);
 }
