@@ -96,4 +96,149 @@ class UsuarioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void loginUsuario_credencialesValidas_redirigeSegunRol() throws Exception {
+        // Arrange
+        String username = "admin";
+        String password = "password123";
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbCI6IkFkbWluaXN0cmF0aXZvIiwiaWF0IjoxNjM5NzI5NjAwLCJleHAiOjE2Mzk3MzMyMDB9.signature";
+        
+        when(usuarioService.loginDeUsuario(username, password)).thenReturn(token);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/Administrativo"));
+    }
+
+    @Test
+    void loginUsuario_credencialesInvalidas_redirigeALoginConError() throws Exception {
+        // Arrange
+        String username = "usuario_inexistente";
+        String password = "password123";
+        
+        when(usuarioService.loginDeUsuario(username, password))
+            .thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/login?error=true"));
+    }
+
+    @Test
+    void loginUsuario_contraseñaIncorrecta_redirigeALoginConError() throws Exception {
+        // Arrange
+        String username = "admin";
+        String password = "contraseña_incorrecta";
+        
+        when(usuarioService.loginDeUsuario(username, password))
+            .thenThrow(new IllegalArgumentException("Contraseña incorrecta."));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/login?error=true"));
+    }
+
+    @Test
+    void mostrarLogin_retornaVistaLogin() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/usuarios/login"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("login"));
+    }
+
+    @Test
+    void mostrarMenuAdministrador_retornaVistaAdministrador() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/usuarios/Administrador"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("menuOpcionesUsuarioAdministrador"));
+    }
+
+    @Test
+    void mostrarMenuAdministrativo_retornaVistaAdministrativo() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/usuarios/Administrativo"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("menuOpcionesUsuarioAdministrativo"));
+    }
+
+    @Test
+    void loginUsuario_conRolRoot_redirigeAAdministrador() throws Exception {
+        // Arrange
+        String username = "root";
+        String password = "root";
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyb290Iiwicm9sIjoicm9vdCIsImlhdCI6MTYzOTcyOTYwMCwiZXhwIjoxNjM5NzMzMjAwfQ.signature";
+        
+        when(usuarioService.loginDeUsuario(username, password)).thenReturn(token);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/Administrador"));
+    }
+
+    @Test
+    void loginUsuario_conRolAdministrativo_redirigeAAdministrativo() throws Exception {
+        // Arrange
+        String username = "usuario_admin";
+        String password = "password123";
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c3VhcmlvX2FkbWluIiwicm9sIjoiQWRtaW5pc3RyYXRpdm8iLCJpYXQiOjE2Mzk3Mjk2MDAsImV4cCI6MTYzOTczMzIwMH0.signature";
+        
+        when(usuarioService.loginDeUsuario(username, password)).thenReturn(token);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/Administrativo"));
+    }
+
+    @Test
+    void loginUsuario_conParametrosVacios_redirigeALoginConError() throws Exception {
+        // Arrange
+        String username = "";
+        String password = "";
+        
+        when(usuarioService.loginDeUsuario(username, password))
+            .thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .param("username", username)
+                .param("password", password)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/login?error=true"));
+    }
+
+    @Test
+    void loginUsuario_conParametrosNulos_redirigeALoginConError() throws Exception {
+        // Arrange
+        when(usuarioService.loginDeUsuario(null, null))
+            .thenThrow(new IllegalArgumentException("Usuario no encontrado."));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/usuarios/loginInput")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/api/usuarios/login?error=true"));
+    }
 }

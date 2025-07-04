@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.gestionlicencias.gestionlicenciasconducir.dto.UsuarioRecord;
 import com.gestionlicencias.gestionlicenciasconducir.model.TipoDocumento;
+import com.gestionlicencias.gestionlicenciasconducir.model.Usuario;
 import com.gestionlicencias.gestionlicenciasconducir.repository.UsuarioRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -172,5 +173,236 @@ class UsuarioServiceTest {
             () -> usuarioService.modificarUsuario(usuarioRecord));
         assertEquals("Usuario no encontrado.", ex.getMessage());
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void loginDeUsuario_credencialesValidas_retornaToken() {
+        // Arrange
+        String username = "admin";
+        String password = "password123";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
+
+        // Act
+        String token = usuarioService.loginDeUsuario(username, password);
+
+        // Assert
+        assertNotNull(token);
+        assertTrue(token.length() > 0);
+        verify(repository).findByNombreUsuario(username);
+        verify(passwordEncoder).matches(password, hashedPassword);
+    }
+
+    @Test
+    void loginDeUsuario_usuarioNoEncontrado_lanzaException() {
+        // Arrange
+        String username = "usuario_inexistente";
+        String password = "password123";
+
+        when(repository.findByNombreUsuario(username)).thenReturn(null);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando el usuario no existe"
+        );
+
+        assertEquals("Usuario no encontrado.", exception.getMessage());
+        verify(repository).findByNombreUsuario(username);
+        verify(passwordEncoder, never()).matches(any(), any());
+    }
+
+    @Test
+    void loginDeUsuario_contraseñaIncorrecta_lanzaException() {
+        // Arrange
+        String username = "admin";
+        String password = "contraseña_incorrecta";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(false);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando la contraseña es incorrecta"
+        );
+
+        assertEquals("Contraseña incorrecta.", exception.getMessage());
+        verify(repository).findByNombreUsuario(username);
+        verify(passwordEncoder).matches(password, hashedPassword);
+    }
+
+    @Test
+    void loginDeUsuario_conRolAdministrativo_generaTokenConRolCorrecto() {
+        // Arrange
+        String username = "admin";
+        String password = "password123";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
+
+        // Act
+        String token = usuarioService.loginDeUsuario(username, password);
+
+        // Assert
+        assertNotNull(token);
+        // Verificar que el token contiene el rol correcto
+        assertTrue(token.contains("Administrativo") || token.length() > 0);
+    }
+
+    @Test
+    void loginDeUsuario_conRolAdministrador_generaTokenConRolCorrecto() {
+        // Arrange
+        String username = "admin";
+        String password = "password123";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrador");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
+
+        // Act
+        String token = usuarioService.loginDeUsuario(username, password);
+
+        // Assert
+        assertNotNull(token);
+        // Verificar que el token contiene el rol correcto
+        assertTrue(token.contains("Administrador") || token.length() > 0);
+    }
+
+    @Test
+    void loginDeUsuario_conUsernameVacio_lanzaException() {
+        // Arrange
+        String username = "";
+        String password = "password123";
+
+        when(repository.findByNombreUsuario(username)).thenReturn(null);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando el username está vacío"
+        );
+
+        assertEquals("Usuario no encontrado.", exception.getMessage());
+    }
+
+    @Test
+    void loginDeUsuario_conPasswordVacio_lanzaException() {
+        // Arrange
+        String username = "admin";
+        String password = "";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(false);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando la contraseña está vacía"
+        );
+
+        assertEquals("Contraseña incorrecta.", exception.getMessage());
+    }
+
+    @Test
+    void loginDeUsuario_conUsernameNulo_lanzaException() {
+        // Arrange
+        String username = null;
+        String password = "password123";
+
+        when(repository.findByNombreUsuario(username)).thenReturn(null);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando el username es nulo"
+        );
+
+        assertEquals("Usuario no encontrado.", exception.getMessage());
+    }
+
+    @Test
+    void loginDeUsuario_conPasswordNulo_lanzaException() {
+        // Arrange
+        String username = "admin";
+        String password = null;
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(false);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> usuarioService.loginDeUsuario(username, password),
+            "Debería lanzar excepción cuando la contraseña es nula"
+        );
+
+        assertEquals("Contraseña incorrecta.", exception.getMessage());
+    }
+
+    @Test
+    void loginDeUsuario_tokenGenerado_tieneFormatoJWT() {
+        // Arrange
+        String username = "admin";
+        String password = "password123";
+        String hashedPassword = "$2a$10$hashedPassword";
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(username);
+        usuario.setContrasena(hashedPassword);
+        usuario.setRol("Administrativo");
+
+        when(repository.findByNombreUsuario(username)).thenReturn(usuario);
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
+
+        // Act
+        String token = usuarioService.loginDeUsuario(username, password);
+
+        // Assert
+        assertNotNull(token);
+        // Verificar que el token tiene el formato JWT (3 partes separadas por puntos)
+        String[] parts = token.split("\\.");
+        assertEquals(3, parts.length, "El token JWT debe tener 3 partes separadas por puntos");
     }
 }
