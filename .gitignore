@@ -31,3 +31,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# ---- Maven ----
+target/
+!.mvn/wrapper/maven-weapper.jar
+
+# --- Logs ---
+*.log
+logs/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Environment variables ---
+.env
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Backup / Temp files ---
+*.bak
+*.swp
+
